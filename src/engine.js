@@ -2,7 +2,7 @@
 /* =====================================================================
    CRAZY CHEMISTRY — simulation engine
    ===================================================================== */
-const type=new Uint8Array(N),aux=new Uint8Array(N),life=new Uint8Array(N),stamp=new Uint8Array(N),vr=new Uint8Array(N);
+const type=new Uint8Array(N),aux=new Uint8Array(N),life=new Uint8Array(N),stamp=new Uint8Array(N),vr=new Uint8Array(N),cloak=new Uint8Array(N);
 const T=new Float32Array(N).fill(20);
 const KNOWN=new Uint8Array(NE);
 for(const e of ELS)if(e.base||e.hide||e.id===0)KNOWN[e.id]=1;
@@ -12,9 +12,9 @@ let noteFn=()=>{},onFound=()=>{},onBoom=()=>{},onGrown=()=>{};
 const note=(k,t)=>noteFn(k,t);
 function found(id){if(id>0&&!KNOWN[id]){KNOWN[id]=1;onFound(id)}}
 
-function setCell(i,t,a){type[i]=t;aux[i]=a|0;vr[i]=(rnd()*8)|0;const l=LIFE[t];life[i]=l?l+((rnd()*l*.5)|0):0;stamp[i]=cur}
+function setCell(i,t,a){type[i]=t;aux[i]=a|0;cloak[i]=0;vr[i]=(rnd()*8)|0;const l=LIFE[t];life[i]=l?l+((rnd()*l*.5)|0):0;stamp[i]=cur}
 function made(i,t,a){setCell(i,t,a);if(t===MOLTEN)found(a);else if(t>0)found(t)}
-function swap(i,j){let v=type[i];type[i]=type[j];type[j]=v;v=aux[i];aux[i]=aux[j];aux[j]=v;v=life[i];life[i]=life[j];life[j]=v;v=vr[i];vr[i]=vr[j];vr[j]=v;
+function swap(i,j){let v=type[i];type[i]=type[j];type[j]=v;v=aux[i];aux[i]=aux[j];aux[j]=v;v=cloak[i];cloak[i]=cloak[j];cloak[j]=v;v=life[i];life[i]=life[j];life[j]=v;v=vr[i];vr[i]=vr[j];vr[j]=v;
   const t=T[i];T[i]=T[j];T[j]=t;stamp[i]=stamp[j]=cur}
 const dn=k=>{const t=type[k];return t===MOLTEN?DENS[aux[k]]*.9:DENS[t]};
 function rn(i,x,y){const dx=(rnd()*3|0)-1,dy=(rnd()*3|0)-1;const nx=x+dx,ny=y+dy;if((dx|dy)===0||nx<0||nx>=W||ny<0||ny>=H)return -1;return ny*W+nx}
@@ -104,7 +104,7 @@ function boom(cx,cy,r){
   for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){
     const d2=dx*dx+dy*dy;if(d2>r2)continue;
     const x=cx+dx,y=cy+dy;if(x<0||x>=W||y<0||y>=H)continue;
-    const k=y*W+x,tt=type[k];if(tt===BENCH||ELS[tt].fixedT!==undefined)continue;
+    const k=y*W+x,tt=type[k];if(tt===BENCH||ELS[tt].fixedT!==undefined||ELS[tt].immune)continue;
     const d=Math.sqrt(d2)/r,e=ELS[tt];
     if(e.beh===STATIC){
       if(r>=10){
@@ -210,6 +210,55 @@ function pulse(k){
   if(tk!==SPARK&&ELS[tk].conduct&&life[k]===0){setCell(k,SPARK,tk);life[k]=2;T[k]=Math.max(T[k],60)}
 }
 
+
+const DIRS24=[];for(let a=-2;a<=2;a++)for(let b=-2;b<=2;b++)if(a||b)DIRS24.push([a,b]);
+const NOBLE=new Set([ID.gold,ID.silver,ID.platinum,ID.electrum,ID.golddust,ID.silverdust]);
+const ANTI_TO={};
+[['acid','saltwater'],['nitricacid','saltwater'],['sulfuricacid','saltwater'],['aquaregia','saltwater'],['phosacid','saltwater'],['base','saltwater'],['bleach','saltwater'],
+ ['vinegar','water'],['hollyacid','water'],['mercury','water'],['methanol','water'],['toluene','water'],['cusol','water'],['agsol','water'],['ausol','water'],['limewater','water'],
+ ['chlorine','void'],['so2','void'],['h2s','void'],['nh3','void'],['no2','void'],['hgvapor','void'],['solvvapor','void'],['ethvapor','void']].forEach(([a,b])=>{ANTI_TO[ID[a]]=b==='void'?0:ID[b]});
+function tapAt(cx,cy){
+  let hit=false;
+  circle(cx,cy,6,(k,x,y)=>{
+    const tk=type[k];if(tk===0)return;const te=ELS[tk];
+    if(te.sp==='hair'){boom(x,y,te.hair.r);hit=true}
+    else if(tk===ID.nitro){boom(x,y,10);hit=true}
+  });
+  note('tap',hit?'TAP. THAT WAS A MISTAKE.':'TAP. NOTHING HAPPENED.');
+}
+function serumFx(i,x,y,e){
+  const fx=e.fx;if(!fx)return false;
+  const pot=e.pot||3,pr=Math.min(1,.05*pot);
+  const j=rn(i,x,y);if(j<0)return false;
+  const tj=type[j];if(tj===0||tj===e.id)return false;
+  const jx=j%W,jy=(j/W)|0,te=ELS[tj];
+  const used=p=>{if(rnd()<p){setCell(i,ID.water);T[i]=20}};
+  switch(fx){
+    case 'antidote':if(ANTI_TO[tj]!==undefined&&rnd()<pr*5){const tt=T[j];setCell(j,ANTI_TO[tj]);T[j]=tt;used(.12);note('serumfx','ANTIDOTE NEUTRALISED '+te.name.toUpperCase())}break;
+    case 'growth':
+      if(tj===ID.seed&&rnd()<pr*5){const sp=aux[j];setCell(j,PLANT,sp);life[j]=BUD[sp]||20;found(PLANT)}
+      else if((tj===PLANT||tj===WOODID)&&aux[j]>0){for(let g=0;g<2+pot*2;g++)growPlant(j,jx,jy,-1);used(.06)}
+      break;
+    case 'repair':{
+      const map={[ID.rust]:ID.iron,[ID.verdigris]:ID.copper,[ID.fes]:ID.iron,[ID.ash]:ID.wood,[ID.fepo4]:ID.iron};
+      if(map[tj]!==undefined&&rnd()<pr*5){setCell(j,map[tj]);T[j]=20;used(.25);note('serumfx','REPAIRED '+te.name.toUpperCase())}break}
+    case 'harden':
+      if(tj!==BENCH&&tj!==ID.adamantium&&te.fixedT===undefined&&(te.beh===STATIC||te.cat==='metal'||te.cat==='alloy')&&rnd()<pr*3){setCell(j,ID.adamantium);T[j]=20;found(ID.adamantium);used(.2);note('serumfx','SOLID TURNED TO ADAMANTIUM')}
+      break;
+    case 'levitate':
+      if((te.beh===POWDER||te.beh===LIQUID)&&rnd()<.6){let jj=j,yy=jy;for(let g=0;g<1+pot&&yy>0&&type[jj-W]===0;g++){swap(jj,jj-W);jj-=W;yy--}}break;
+    case 'cloak':
+      if(tj!==BENCH&&!cloak[j]&&rnd()<pr*4){cloak[j]=1;used(.15)}break;
+    case 'cryo':
+      if(te.fixedT===undefined)T[j]=Math.max(-190,T[j]-120*pot);if(rnd()<.02)used(1);break;
+    case 'pyro':
+      if(te.fixedT===undefined){T[j]+=140*pot;if(rnd()<.2*pot)spawnFire(j,jx,jy,0)}if(rnd()<.03)used(1);break;
+    case 'mutate':
+      if(tj!==BENCH&&te.fixedT===undefined&&rnd()<pr*2){const id=RANDPOOL[(rnd()*RANDPOOL.length)|0];setCell(j,id);T[j]=ELS[id].initT!==undefined?ELS[id].initT:20;found(id);used(.2)}break;
+  }
+  return false;
+}
+
 /* ---------------- crazy specials ---------------- */
 const RANDPOOL=ELS.filter(e=>e.id>0&&!e.hide&&e.fixedT===undefined&&!e.sp&&!e.tintFire&&['powder','liquid','gas','metal','alloy','mineral','boom'].includes(e.cat)&&e.id!==BENCH).map(e=>e.id);
 const FWTINTS=['lithium','sodium','potassium','strontium','barium','coppersulfate','cesium','calcium','rubidium'].map(k=>ID[k]);
@@ -298,6 +347,34 @@ function special(i,x,y,t,e){
       }
       if(e.storm&&rnd()<.0007)lightning(x,Math.min(H-8,y+14+((rnd()*70)|0)));
       return true}
+
+    case 'hair':{
+      const below=y<H-1?type[i+W]:BENCH;
+      const bb=ELS[below].beh;
+      if(below===0||bb===GAS||bb===LIQUID||bb===FIREB){aux[i]=3}            /* in the air */
+      else if(aux[i]>0){boom(x,y,e.hair.r);note('hair','IT LANDED. IT WENT OFF.');return true}
+      for(let q=0;q<4;q++){
+        const nx=x+(q===0?1:q===1?-1:0),ny=y+(q===2?1:q===3?-1:0);if(nx<0||nx>=W||ny<0||ny>=H)continue;
+        const tn=type[ny*W+nx];if(tn===0||tn===t)continue;
+        const nb=ELS[tn].beh;
+        if(nb===POWDER||nb===LIQUID||nb===FIREB||nb===SPARKB){boom(x,y,e.hair.r);note('hair','A TOUCH WAS ENOUGH');return true}
+      }
+      return false}
+    case 'holly':{
+      let ate=false;
+      for(let q=0;q<24;q++){
+        const d=DIRS24[q],nx=x+d[0],ny=y+d[1];if(nx<0||nx>=W||ny<0||ny>=H)continue;
+        const k=ny*W+nx,tk=type[k];if(tk===0)continue;
+        const te=ELS[tk];
+        if(tk===BENCH||tk===GLASS||tk===ID.adamantium||te.fixedT!==undefined||NOBLE.has(tk))continue;
+        const metalish=te.cat==='metal'||te.cat==='alloy'||tk===ID.stone||tk===ID.concrete||tk===ID.brick||tk===ID.vault||tk===ID.wire||tk===ID.battery||tk===MOLTEN;
+        if(!metalish)continue;
+        setCell(k,0);T[k]=40;ate=true;
+        if(rnd()<.3){const m=rn(k,nx,ny);if(m>=0&&type[m]===0)setCell(m,ID.smoke)}
+      }
+      if(ate){note('holly','HOLLYWOOD ACID: DISSOLVED INSTANTLY');if(rnd()<.012){setCell(i,0);return true}}
+      return false}
+    case 'serum':return serumFx(i,x,y,e);
     case 'rocket':{
       if(!aux[i])aux[i]=FWTINTS[(rnd()*FWTINTS.length)|0];
       if(--life[i]<=0||life[i]>200){burst(x,y,aux[i]);setCell(i,0);return true}
@@ -436,7 +513,7 @@ const pack=(r,g,b)=>(255<<24)|((b&255)<<16)|((g&255)<<8)|(r&255);
 const BGc=[12,10,18];
 const BG=pack(12,10,18),DOT=pack(30,26,44);
 const PAL=new Uint32Array(NE*8);
-for(const e of ELS){
+function palFor(e){
   const a=e.alpha===undefined?1:e.alpha;
   for(let v=0;v<8;v++){
     const f=.9+.2*(v/7);
@@ -444,6 +521,7 @@ for(const e of ELS){
     PAL[e.id*8+v]=pack(c[0],c[1],c[2]);
   }
 }
+for(const e of ELS)palFor(e);
 const RBOW=[[255,70,70],[255,160,50],[255,230,60],[90,220,90],[60,200,255],[90,100,255],[190,90,255],[255,100,200]];
 for(const k of ['rainbow','chaos'])for(let v=0;v<8;v++){const c=RBOW[v];PAL[ID[k]*8+v]=pack(c[0],c[1],c[2])}
 const CHAOSID=ID.chaos;
@@ -466,7 +544,8 @@ function render(){
   for(let y=0;y<H;y++){
     const row=y*W;
     for(let x=0;x<W;x++){
-      const i=row+x,t=type[i],Ti=T[i];
+      const i=row+x,Ti=T[i];
+      const t=(cloak[i]&&!thermal)?0:type[i];
       let c;
       if(thermal){
         ramp(TH,Ti);if(t!==0){R=R*.75+55;Gc=Gc*.75+55;B=B*.75+55}
@@ -570,4 +649,4 @@ function fillRect(x0,y0,x1,y1,key,pr,tmp){
     setCell(k,id);T[k]=tmp!==undefined?tmp:(e.initT!==undefined?e.initT:20);
   }
 }
-function clearAll(){type.fill(0);aux.fill(0);life.fill(0);stamp.fill(0);T.fill(20);cur=1}
+function clearAll(){cloak.fill(0);type.fill(0);aux.fill(0);life.fill(0);stamp.fill(0);T.fill(20);cur=1}

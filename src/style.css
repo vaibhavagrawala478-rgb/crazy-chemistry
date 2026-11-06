@@ -146,6 +146,22 @@ body.chaos .frame{animation:chaosframe .6s steps(1) infinite}
 .cxt{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
 .cxt h2{font-size:48px;line-height:1;color:var(--butter);text-shadow:4px 4px 0 var(--shadow);margin-right:auto}
 .cx h4{font-size:24px;color:var(--c);margin:16px 0 8px;text-shadow:2px 2px 0 var(--shadow)}
+.serform{display:flex;flex-direction:column;gap:14px}
+.serrow{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.serrow>span{width:96px;color:var(--dim);flex:none}
+.serrow input[type=text],#sername{flex:1;min-width:160px;background:var(--bg);border:4px solid var(--line);color:var(--ink);font:inherit;padding:6px 10px 4px;outline:0;text-transform:uppercase}
+#sername:focus{border-color:var(--butter)}
+.fxgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:8px;flex:1;min-width:240px}
+.fxb{padding:8px 10px 6px;border:4px solid var(--line);background:var(--bg);text-align:left}
+.fxb:hover{border-color:var(--ink)}
+.fxb.on{background:var(--butter);color:#15111c;border-color:var(--butter)}
+.swatches{display:flex;gap:6px;flex-wrap:wrap}
+.sw1{width:32px;height:32px;border:4px solid var(--shadow);cursor:pointer}
+.sw1.on{outline:4px solid var(--ink);outline-offset:2px}
+.serprev{display:flex;align-items:center;gap:12px;border:4px solid var(--line);padding:10px;min-height:64px}
+.serprev .vv{width:32px;height:48px;border:4px solid var(--ink);background:var(--c);flex:none}
+.serprev b{font-weight:400;font-size:24px;color:var(--c)}
+.serbtns{display:flex;gap:8px;flex-wrap:wrap}
 .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:8px}
 .tile{display:flex;flex-direction:column;gap:2px;text-align:left;padding:8px 8px 6px;border:4px solid var(--line);background:var(--bg);position:relative;min-height:120px}
 .tile .tsw{display:block;width:32px;height:32px;margin-bottom:6px;background:var(--c);border:4px solid var(--ink)}

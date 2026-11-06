@@ -9,7 +9,7 @@ const ELS=[],ID={};
 const CATS=[
   ['lab','LAB','#ffd45e'],['powder','POWDERS','#f2b968'],['liquid','LIQUIDS','#5cc8ff'],['gas','GASES','#8be8c4'],
   ['metal','METALS','#c9d3e0'],['alloy','ALLOYS','#e8b86a'],['mineral','MINERALS','#c2a8c8'],['life','LIFE','#6ee7a0'],['flora','FLORA','#7be07a'],
-  ['boom','BOOM','#ff6a5c'],['crazy','CRAZY','#ff4fd8'],['demo','DEMOS','#b896ff']
+  ['boom','BOOM','#ff6a5c'],['crazy','CRAZY','#ff4fd8'],['serum','SERUMS','#7be0ff'],['demo','DEMOS','#b896ff']
 ];
 const BEHN=['EMPTY','SOLID','POWDER','LIQUID','GAS','ENERGY','ENERGY'];
 const D_COND=[.012,.3,.15,.5,.03,.8,.8],D_CAP=[1,2,1.6,3,1,1,1];
@@ -259,6 +259,22 @@ def('cola','Cola','Cola','COLA','crazy',LIQUID,1.04,[72,40,26],{base:1,alpha:.96
 def('mentos','Mentos','Mentos','MINT','crazy',POWDER,1.3,[246,246,238],{base:1,cond:.15,cap:1.6,desc:'Drop them into cola. Stand back.'});
 def('plasma','Plasma','Plasma','PLASMA','crazy',FIREB,.0003,[214,134,255],{base:1,tintFire:1,flame:[214,134,255],flameT:4200,lifeBase:30,cond:.8,cap:1,tag:['4000 C'],desc:'Ionised gas hot enough to melt tungsten. It lights and melts everything.'});
 
+/* ---------------- MOVIE CHEMISTRY ---------------- */
+def('hollyacid','Holly acid','Hollywood acid','H-ACID','crazy',LIQUID,1.3,[120,255,70],{base:1,alpha:.92,cond:.5,cap:3,sp:'holly',tag:['CORROSIVE','HOLLYWOOD'],
+  desc:'Movie acid. Eats through a vault door or a floor in seconds, and leaves glass, gold, water and plants completely alone.'});
+def('vault','Vault','Vault steel','VAULT','crazy',STATIC,12,[92,100,120],{base:1,cond:.5,cap:4,conduct:1,immune:1,tag:['BLAST PROOF'],
+  desc:'Bank vault steel. Blast proof, fireproof and unfazed by every normal acid. Hollywood acid walks straight through it.'});
+def('adamantium','Adamantium','Adamantium','AD','mineral',STATIC,14,[70,88,150],{cond:.6,cap:4,conduct:1,immune:1,tag:['INDESTRUCTIBLE'],
+  desc:'Nothing here dents it. Not blasts, not acid, not Hollywood acid. Made by a super strength serum.'});
+def('ni3','NI3','Nitrogen triiodide','NI3','boom',POWDER,3.3,[76,42,98],{base:1,cond:.1,cap:1.5,sp:'hair',hair:{r:3},
+  burn:{T:60,p:.9,to:'void',heat:300,flame:1,boom:[1,3],eq:'2NI3 -> N2 + 3I2 (shock detonation)'},tag:['SHOCK SENSITIVE'],
+  desc:'Dark purple crystals. Goes off if anything lands on it or even brushes it. Do not drop it. Draw it onto the floor and keep still.'});
+def('fulminate','Fulminate','Mercury fulminate','Hg(CNO)2','boom',POWDER,4.4,[150,148,154],{base:1,cond:.1,cap:1.5,sp:'hair',hair:{r:4},
+  burn:{T:90,p:.9,to:'void',heat:400,flame:1,boom:[1,4],eq:'Hg(CNO)2 detonates'},tag:['SHOCK SENSITIVE'],desc:'Old detonator powder. A tap sets it off.'});
+def('compoundx','Compound X','Compound X','X','boom',POWDER,2.2,[255,70,170],{base:1,cond:.1,cap:1.6,sp:'hair',hair:{r:8},flame:[255,120,220],flameT:1600,
+  burn:{T:80,p:.9,to:'void',heat:900,flame:1,boom:[1,8],eq:'COMPOUND X goes off'},tag:['HAIR TRIGGER'],desc:'The movie one. Blows up when it lands, when you breathe on it, when you look at it wrong.'});
+for(let n=1;n<=8;n++)def('serum'+n,'Serum','Serum','SERUM','serum',LIQUID,1.02,[120,230,255],{alpha:.88,cond:.5,cap:3,sp:'serum',nocodex:1,desc:''});
+
 const NE=ELS.length;
 const FIRE=ID.fire,SPARK=ID.spark,MOLTEN=ID.molten,OXY=ID.oxygen,GLASS=ID.glass,BENCH=ID.bench,ICE=ID.ice,PLANT=ID.plant;
 const resolveKey=k=>k==='void'?0:ID[k];
@@ -449,9 +465,9 @@ for(const e of ELS){
   if(e.cold&&e.cold.toId>0)recipe(e.cold.toId,'Cool '+(e.nm||e.name));
   if(e.burn){const b=e.burn;if(b.toId>0)recipe(b.toId,'Burn '+(e.nm||e.name));if(b.moltenId)recipe(b.moltenId,'Burn '+(e.nm||e.name))}
 }
-recipe(ID.wetconcrete,'Cement + Water');recipe(ID.concrete,'Let Wet crete set');recipe(ID.brick,'Fire Clay');
+recipe(ID.adamantium,'Super strength serum + any solid');recipe(ID.wetconcrete,'Cement + Water');recipe(ID.concrete,'Let Wet crete set');recipe(ID.brick,'Fire Clay');
 recipe(ID.mud,'Dirt + Water');recipe(ID.plant,'Seed + Water');
 
 /* ---------------- unlock tree: base set + discoveries ---------------- */
-const PRODUCTS=ELS.filter(e=>e.id>0&&!e.base&&!e.hide&&e.cat!=='-').map(e=>e.id);
+const PRODUCTS=ELS.filter(e=>e.id>0&&!e.base&&!e.hide&&!e.nocodex&&e.cat!=='-').map(e=>e.id);
 const moltenName=a=>{const s=ELS[a];return a===ID.stone?'Lava':(a===ID.sand?'Molten glass':'Molten '+s.name.toLowerCase())};

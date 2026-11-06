@@ -20,6 +20,7 @@
       <button class="pb" id="bHood" aria-pressed="true"><span>HOOD</span></button>
       <button class="pb" id="bClear"><span>CLEAR</span></button>
       <button class="pb chaosb" id="bChaos" aria-pressed="false"><span>CHAOS</span></button>
+      <button class="pb" id="bSerum"><span>SERUMS</span></button>
       <div class="seg" id="speed"><button data-s="0.5">.5X</button><button data-s="1" class="on">1X</button><button data-s="2">2X</button><button data-s="3">3X</button></div>
       <label class="rng">BRUSH <input type="range" id="brush" min="1" max="14" value="4" aria-label="Brush size"><b id="bval" style="font-weight:400;width:24px">4</b></label>
       <button class="pb" id="bMute" aria-pressed="false"><span>SFX ON</span></button>
@@ -63,6 +64,22 @@
     </div>
     <p class="hint" style="margin:0 0 8px">EVERY MIX THAT MAKES SOMETHING NEW UNLOCKS IT IN YOUR DOCK. TAP A LOCKED TILE FOR A HINT.</p>
     <div id="cxtiles"></div>
+  </div>
+</div>
+<div class="codex" id="sermodal" role="dialog" aria-label="Serum lab">
+  <div class="cx">
+    <div class="cxt"><h2>SERUM LAB</h2><span>ANY EFFECT, ANY COLOUR. WHIP UP A CUSTOM LIQUID.</span>
+      <button class="pb hot" id="serclose"><span>CLOSE</span></button></div>
+    <div class="serform">
+      <label class="serrow"><span>NAME</span><input id="sername" maxlength="16" value="ANTIDOTE X" autocomplete="off" spellcheck="false"></label>
+      <div class="serrow"><span>EFFECT</span><div class="fxgrid" id="fxgrid"></div></div>
+      <p class="hint" id="fxdesc"></p>
+      <div class="serrow"><span>COLOUR</span><div class="swatches" id="swatches"></div><button class="pb" id="serrand"><span>RANDOM</span></button></div>
+      <label class="serrow"><span>POTENCY</span><input type="range" id="serpot" min="1" max="5" value="3"><b id="serpotv" style="font-weight:400">3</b></label>
+      <div class="serprev" id="serprev"></div>
+      <div class="serbtns"><button class="pb hot" id="serbrew"><span>BREW SERUM</span></button><button class="pb" id="serclear"><span>CLEAR ALL SERUMS</span></button></div>
+      <p class="hint">YOU CAN KEEP UP TO 8. THEY APPEAR IN THE SERUMS TAB OF THE DOCK. POUR THEM ON WHATEVER YOU WANT TO CHANGE.</p>
+    </div>
   </div>
 </div>
 <div class="toasts" id="toasts"></div>

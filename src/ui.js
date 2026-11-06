@@ -9,13 +9,14 @@ const U=s=>String(s).toUpperCase();
 
 /* ---------- persistence ---------- */
 const LS='crazychem.v2';
+const SERIDS=[1,2,3,4,5,6,7,8].map(n=>ID['serum'+n]);
 let sandbox=false;
 try{
   const saved=JSON.parse(localStorage.getItem(LS)||'null');
   if(saved){(saved.known||[]).forEach(k=>{if(ID[k]!==undefined)KNOWN[ID[k]]=1});sandbox=!!saved.sandbox;(saved.grown||[]).forEach(n=>{const q=SPN.indexOf(n);if(q>0)GROWN[q]=1})}
 }catch(e){}
 if(/unlock/.test(location.search))sandbox=true;
-function save(){try{localStorage.setItem(LS,JSON.stringify({known:ELS.filter(e=>KNOWN[e.id]&&!e.base).map(e=>e.key),sandbox,grown:SPN.filter((n,q)=>q>0&&GROWN[q])}))}catch(e){}}
+function save(){try{localStorage.setItem(LS,JSON.stringify({known:ELS.filter(e=>KNOWN[e.id]&&!e.base).map(e=>e.key),sandbox,grown:SPN.filter((n,q)=>q>0&&GROWN[q]),serums:SERIDS.map(id=>KNOWN[id]?{name:ELS[id].name,fx:ELS[id].fx,col:rgbHex(ELS[id].col),pot:ELS[id].pot}:null)}))}catch(e){}}
 
 /* ---------- sound (starts after first click) ---------- */
 let AC=null,muted=false;
@@ -51,6 +52,7 @@ const TOOLS=[
   {kind:'cool',nm:'Chiller',name:'Chiller',sym:'-HEAT',col:[92,200,255],desc:'Pulls heat out. Freezes water and solidifies melts.',tag:['-90 C / TICK']},
   {kind:'erase',nm:'Eraser',name:'Eraser',sym:'ERASE',col:[246,239,224],desc:'Removes anything under the brush, glass and benches too.'},
   {kind:'vial',nm:'Vial',name:'Vial capture',sym:'[  ]',col:[255,212,94],desc:'Drag a box round some chemicals to bottle them. Then click the vial in the rack and hold on the bench to pour it out.'},
+  {kind:'tap',nm:'Tap',name:'Tap',sym:'TAP',col:[255,214,80],desc:'Click to tap the bench. Gentle. Hair-trigger explosives will not appreciate it.'},
   {kind:'meteor',nm:'Meteor',name:'Meteor strike',sym:'ROCK',col:[255,150,60],desc:'Click to drop a meteor. Craters the bench and leaves molten rock.'},
   {kind:'bolt',nm:'Lightning',name:'Lightning',sym:'ZZAP',col:[160,255,255],desc:'Click to drop a lightning bolt from the sky. Lights fuel, shatters glass, runs down metal.'},
   {kind:'stamp',stamp:'beaker',nm:'Beaker',name:'Beaker',sym:'U',col:[150,205,215],desc:'Click to place a glass beaker.'},
@@ -122,6 +124,24 @@ const SCENES=[
    fillRect(40,214,70,227,'iron');fillRect(130,214,160,227,'gold');fillRect(220,214,250,227,'copper');fillRect(310,214,350,227,'stone')}},
  {n:'Gray goo',d:'Contain it. Good luck.',f(){clearAll();const b=beaker(190,232,120,80);fillRect(b.x0,b.y1-30,b.x1,b.y1,'water');fillRect(150,200,160,206,'sand');fillRect(238,150,244,156,'goo')}},
  {n:'Chaos juice',d:'Everything it touches mutates',f(){clearAll();const b=beaker(190,232,120,70);fillRect(b.x0,b.y1-34,b.x1,b.y1,'water');fillRect(b.x0+8,b.y1-6,b.x1-8,b.y1-2,'sand');fillRect(150,120,170,126,'chaos',.8)}},
+ {n:'Heist',d:'Hollywood acid vs a vault',f(){clearAll();fillRect(10,228,375,231,'stone');
+   fillRect(110,150,270,227,'vault');
+   for(let y=164;y<=214;y++)for(let x=124;x<=256;x++){const k=y*W+x;setCell(k,0)}
+   fillRect(130,206,150,214,'gold');fillRect(160,206,180,214,'gold');fillRect(190,206,210,214,'gold');
+   const b=beaker(235,214,34,26);fillRect(b.x0,b.y1-12,b.x1,b.y1,'water');setCell(205*W+224,ID.seed,spId('Dahlia'));
+   for(let y=134;y<=149;y++){glassPut(116,y);glassPut(264,y)}fillRect(117,140,263,149,'hollyacid')}},
+ {n:'Hair trigger',d:'Do not drop it',f(){clearAll();fillRect(10,228,375,231,'bench');
+   fillRect(60,227,90,227,'ni3');fillRect(160,227,190,227,'fulminate');fillRect(260,227,290,227,'compoundx');
+   [75,175,275].forEach(x=>setCell(120*W+x,ID.sand))}},
+ {n:'Antidote lab',d:'Brew it, then pour it',f(){const k=makeSerum('ANTIDOTE X','antidote','#5be8b0',4,true);clearAll();
+   const b=beaker(190,232,140,80);fillRect(b.x0+4,b.y1-20,b.x0+36,b.y1,'acid');fillRect(b.x0+40,b.y1-20,b.x0+70,b.y1,'hollyacid');fillRect(b.x0+74,b.y1-20,b.x1-30,b.y1,'bleach');fillRect(b.x1-28,b.y1-20,b.x1-2,b.y1,'mercury');
+   fillRect(b.x0,b.y1-50,b.x1,b.y1-30,k,.5)}},
+ {n:'Gro-serum',d:'Instant garden',f(){const k=makeSerum('GRO-SERUM','growth','#ff6ec7',4,true);clearAll();
+   fillRect(18,196,19,231,'bench');fillRect(364,196,365,231,'bench');fillRect(18,230,365,231,'bench');fillRect(20,214,363,229,'mud');
+   ['Daffodil','Dahlia','Cactus','Paper Birch','Zinnia','Delphinium','Pansy','Date Palm'].forEach((n,i)=>{const q=spId(n);if(q>0)setCell(213*W+(50+i*40),ID.seed,q)});
+   fillRect(30,120,350,130,k,.15)}},
+ {n:'Invisible sand',d:'Cloak serum on a sand pile',f(){const k=makeSerum('CLOAK X','cloak','#b27bff',4,true);clearAll();
+   fillRect(10,228,375,231,'stone');fillRect(120,200,260,227,'sand');const b=beaker(310,227,54,46);fillRect(b.x0,b.y1-20,b.x1,b.y1,'water');fillRect(130,120,250,128,k,.4)}},
 ];
 for(const s of SCENES)items.push({cat:'demo',kind:'demo',scene:s,nm:s.n,name:s.n,sym:'DEMO',col:[184,150,255],desc:s.d.toUpperCase(),tag:[],state:'DEMO'});
 function startBench(){
@@ -196,7 +216,7 @@ function inspect(it){
 }
 function setTool(t){
   tool=t;if(t.kind!=='pour')lastTool=t;
-  const m=t.kind==='pour'?'POUR VIAL '+(t.slot+1):{el:'BRUSH',heat:'HEAT GUN',cool:'CHILLER',erase:'ERASER',vial:'VIAL CAPTURE',stamp:'PLACE GLASS',bolt:'LIGHTNING',meteor:'METEOR'}[t.kind];
+  const m=t.kind==='pour'?'POUR VIAL '+(t.slot+1):{el:'BRUSH',heat:'HEAT GUN',cool:'CHILLER',erase:'ERASER',vial:'VIAL CAPTURE',stamp:'PLACE GLASS',bolt:'LIGHTNING',meteor:'METEOR',tap:'TAP'}[t.kind];
   $('#hmode').textContent=m;updateRing();
 }
 
@@ -373,6 +393,7 @@ cvEl.addEventListener('pointerdown',e=>{
   if(tool.kind==='stamp'){const [fn,[w,h]]=STAMPS[tool.stamp];fn(x,Math.min(H-1,y+(h>>1)),w,h);ptr.down=false}
   else if(tool.kind==='bolt'){lightning(x,y);ptr.down=false}
   else if(tool.kind==='meteor'){meteor(x,y);ptr.down=false}
+  else if(tool.kind==='tap'){tapAt(x,y);blip(180,.08,'square',.05);ptr.down=false}
   else if(tool.kind==='vial')selbox.style.display='block';
   updateRing();
 });
@@ -405,6 +426,71 @@ function hoverInfo(){
   $('#hover').textContent=U(n)+'  '+T[k].toFixed(0)+' C';
   $('#hxy').textContent=ptr.cx+','+ptr.cy;
 }
+
+
+/* ---------- serum lab ---------- */
+const EFFECTS=[
+  {k:'antidote',n:'ANTIDOTE',d:'NEUTRALISES ACIDS, BASES, BLEACH, MERCURY AND POISON GAS. EVEN HOLLYWOOD ACID.'},
+  {k:'growth',n:'GROWTH',d:'MAKES SEEDS SPROUT AND PLANTS SHOOT UP AT ONCE.'},
+  {k:'repair',n:'REPAIR',d:'TURNS RUST AND ASH BACK INTO IRON, COPPER AND WOOD.'},
+  {k:'harden',n:'SUPER STRENGTH',d:'TURNS SOLIDS INTO ADAMANTIUM. NOTHING DENTS IT.'},
+  {k:'levitate',n:'FLIGHT',d:'LIFTS ANY POWDER OR LIQUID IT TOUCHES UPWARD.'},
+  {k:'cloak',n:'INVISIBILITY',d:'MAKES WHATEVER IT TOUCHES INVISIBLE. IT IS STILL THERE.'},
+  {k:'cryo',n:'CRYO',d:'FLASH FREEZES WHATEVER IT TOUCHES.'},
+  {k:'pyro',n:'PYRO',d:'SETS WHATEVER IT TOUCHES ALIGHT.'},
+  {k:'mutate',n:'MUTATION',d:'SWAPS WHAT IT TOUCHES FOR A RANDOM ELEMENT.'}
+];
+const SWATCH=['#7be0ff','#5be8b0','#b6ff4a','#ffd45e','#ff9a3c','#ff5a5a','#ff6ec7','#b27bff','#5c7bff','#f4f4f4','#2d2d38','#9d6b3a'];
+const hexRgb=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
+const rgbHex=c=>'#'+c.map(v=>Math.round(v).toString(16).padStart(2,'0')).join('');
+let serNext=0,serFx='antidote',serCol=SWATCH[1];
+function applySerum(slot,name,fx,hex,pot){
+  const e=ELS[slot],fo=EFFECTS.find(f=>f.k===fx)||EFFECTS[0];
+  e.name=name;e.nm=name.slice(0,10);e.sym='SERUM';e.col=hexRgb(hex);e.fx=fo.k;e.pot=pot;e.alpha=.9;e.desc=fo.d;e.tag=[fo.n,'POTENCY '+pot];
+  KNOWN[slot]=1;palFor(e);
+  const it=items.find(i=>i.el===e);
+  it.nm=e.nm;it.name=name;it.col=e.col;it.desc=fo.d;it.tag=e.tag;it.sym='SERUM';
+}
+function makeSerum(name,fx,hex,pot,quiet){
+  let slot=SERIDS.find(id=>KNOWN[id]&&ELS[id].name===name&&ELS[id].fx===fx);
+  if(slot===undefined){slot=SERIDS.find(id=>!KNOWN[id]);if(slot===undefined){slot=SERIDS[serNext%8];serNext++}}
+  applySerum(slot,name,fx,hex,pot);save();buildTabs();
+  if(!quiet){cat='serum';buildTabs();select(items.find(i=>i.el===ELS[slot]));sfxFound()}
+  return ELS[slot].key;
+}
+function loadSerums(){
+  try{const s=JSON.parse(localStorage.getItem(LS)||'null');(s&&s.serums||[]).forEach((o,i)=>{if(o&&SERIDS[i]!==undefined)applySerum(SERIDS[i],o.name,o.fx,o.col,o.pot)})}catch(e){}
+}
+const serModal=$('#sermodal');
+function serPreview(){
+  const n=($('#sername').value||'SERUM').toUpperCase();
+  $('#serprev').style.setProperty('--c',serCol);
+  $('#serprev').innerHTML='<div class="vv"></div><div><b>'+U(n)+'</b><br><span style="color:var(--dim)">'+EFFECTS.find(f=>f.k===serFx).n+'  POTENCY '+$('#serpot').value+'</span></div>';
+}
+function buildSerumUI(){
+  $('#fxgrid').innerHTML=EFFECTS.map(f=>'<button class="fxb '+(f.k===serFx?'on':'')+'" data-k="'+f.k+'">'+f.n+'</button>').join('');
+  $('#fxdesc').textContent=EFFECTS.find(f=>f.k===serFx).d;
+  $('#swatches').innerHTML=SWATCH.map(c=>'<button class="sw1 '+(c===serCol?'on':'')+'" data-c="'+c+'" style="background:'+c+'" aria-label="Colour '+c+'"></button>').join('');
+  serPreview();
+}
+function serToggle(v){serModal.classList.toggle('open',v);if(v)buildSerumUI();sfxClick()}
+$('#bSerum').onclick=()=>serToggle(!serModal.classList.contains('open'));
+$('#serclose').onclick=()=>serToggle(false);
+$('#fxgrid').addEventListener('click',e=>{const b=e.target.closest('.fxb');if(!b)return;serFx=b.dataset.k;
+  const cur=$('#sername').value.trim().toUpperCase();if(!cur||EFFECTS.some(f=>cur.startsWith(f.n.split(' ')[0])||cur==='SERUM X'||cur==='ANTIDOTE X'))$('#sername').value=EFFECTS.find(f=>f.k===serFx).n.split(' ')[0]+' X';
+  buildSerumUI()});
+$('#swatches').addEventListener('click',e=>{const b=e.target.closest('.sw1');if(!b)return;serCol=b.dataset.c;buildSerumUI()});
+$('#serrand').onclick=()=>{serCol=SWATCH[(Math.random()*SWATCH.length)|0];buildSerumUI()};
+$('#sername').addEventListener('input',serPreview);
+$('#serpot').addEventListener('input',e=>{$('#serpotv').textContent=e.target.value;serPreview()});
+$('#serbrew').onclick=()=>{
+  const name=($('#sername').value.trim()||'SERUM').toUpperCase();
+  makeSerum(name,serFx,serCol,+$('#serpot').value);
+  serToggle(false);
+  note('brew','BREWED '+name);
+};
+$('#serclear').onclick=()=>{SERIDS.forEach(id=>{KNOWN[id]=0;ELS[id].fx=null});serNext=0;save();buildTabs();if(cat==='serum'){cat='liquid';buildTabs()}buildGrid();note('brew','ALL SERUMS POURED AWAY')};
+window.addEventListener('keydown',e=>{if(e.key==='Escape')serToggle(false)});
 
 /* ---------- chaos mode ---------- */
 let chaos=false,chaosT=40;
@@ -447,8 +533,10 @@ function loop(ts){
   select(items.find(i=>i.el&&i.el.key==='water'));
   cat='liquid';buildTabs();buildGrid();
   {const mc=/cat=(\w+)/.exec(location.hash);if(mc){cat=mc[1];buildTabs();buildGrid()}}
+  loadSerums();
   counts();renderRack();fit();startBench();
   if(/codex/.test(location.hash))codexToggle(true);
+  if(/serumlab/.test(location.hash))serToggle(true);
   const m=/scene=(\d+)(?:&steps=(\d+))?/.exec(location.hash);
   if(m&&SCENES[+m[1]]){SCENES[+m[1]].f();for(let i=0;i<(+m[2]||0);i++)step()}
   const intro=$('#intro');
