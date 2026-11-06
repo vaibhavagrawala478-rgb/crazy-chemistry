@@ -16,7 +16,7 @@ Open `index.html` in a browser. No install needed.
 
 ## Build
 
-`index.html` is generated from `src/` (elements, plants, engine, UI, styles). After editing:
+`index.html` is generated from `src/` (elements, plants, colours, engine, UI, styles). After editing:
 
 ```
 python build.py
