@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Crazy Chemistry</title>
+<meta name="description" content="A pixel chemistry lab. Mix, melt, shock and bottle 100+ elements, and discover the compounds hiding in your mixes.">
+<style>
+/*__CSS__*/
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <h1 class="logo" id="logo" aria-label="Crazy Chemistry"></h1>
+    <div class="ctrls">
+      <button class="pb" id="bPause" aria-pressed="false"><span>PAUSE</span></button>
+      <button class="pb" id="bStep"><span>STEP</span></button>
+      <button class="pb" id="bThermal" aria-pressed="false"><span>THERMAL</span></button>
+      <button class="pb" id="bHood" aria-pressed="true"><span>HOOD</span></button>
+      <button class="pb" id="bClear"><span>CLEAR</span></button>
+      <div class="seg" id="speed"><button data-s="0.5">.5X</button><button data-s="1" class="on">1X</button><button data-s="2">2X</button><button data-s="3">3X</button></div>
+      <label class="rng">BRUSH <input type="range" id="brush" min="1" max="14" value="4" aria-label="Brush size"><b id="bval" style="font-weight:400;width:24px">4</b></label>
+      <button class="pb" id="bMute" aria-pressed="false"><span>SFX ON</span></button>
+      <button class="pb hot cdx" id="bCodex"><span>CODEX <b id="cdxn">0/0</b></span><div class="bar"><i id="cdxbar"></i></div></button>
+    </div>
+  </header>
+
+  <main class="mid">
+    <section class="stagebox" id="stagebox">
+      <div class="frame" id="frame">
+        <canvas id="sim" width="384" height="240"></canvas>
+        <canvas id="glow" width="192" height="120"></canvas>
+        <div class="crt"></div>
+        <div class="ring" id="ring"></div>
+        <div class="selbox" id="selbox"></div>
+        <div class="tr"><b id="fps">60</b> FPS  <b id="cnt">0</b> PARTICLES</div>
+        <div class="hud"><span><b id="hxy">0,0</b>  <span id="hover">AIR</span></span><span class="m" id="hmode">BRUSH</span></div>
+      </div>
+    </section>
+    <aside class="side">
+      <div><div class="lbl"><span>INSPECTOR</span><b id="insp-state"></b></div><div class="insp" id="insp"></div></div>
+      <div><div class="lbl"><span>STORAGE RACK</span><b id="rackct">0/5</b></div><div class="rack" id="rack"></div>
+        <p class="hint">PICK <b>VIAL</b> IN LAB, DRAG A BOX OVER CHEMICALS TO BOTTLE THEM. CLICK A VIAL AND HOLD ON THE BENCH TO POUR.</p></div>
+      <div><div class="lbl"><span>LAB NOTEBOOK</span><b>LIVE</b></div><div class="log" id="log"><div data-empty="1">NOTHING HAS REACTED YET. MIX SOMETHING.</div></div></div>
+    </aside>
+  </main>
+
+  <section class="dock">
+    <nav class="tabs" id="tabs"></nav>
+    <div class="grid" id="grid"></div>
+  </section>
+</div>
+
+<div class="codex" id="codex" role="dialog" aria-label="Codex">
+  <div class="cx">
+    <div class="cxt">
+      <h2>CODEX</h2><span id="cxhead"></span>
+      <button class="pb" id="cxunlock" aria-pressed="false"><span>UNLOCK ALL</span></button>
+      <button class="pb hot" id="cxclose"><span>CLOSE</span></button>
+    </div>
+    <p class="hint" style="margin:0 0 8px">EVERY MIX THAT MAKES SOMETHING NEW UNLOCKS IT IN YOUR DOCK. TAP A LOCKED TILE FOR A HINT.</p>
+    <div id="cxtiles"></div>
+  </div>
+</div>
+<div class="toasts" id="toasts"></div>
+
+<div class="intro" id="intro"><div class="iw">
+  <h1 id="i1"></h1><h1 id="i2"></h1>
+  <div class="ibar"><i></i></div><div class="itxt">CALIBRATING BEAKERS...</div>
+</div></div>
+
+<script>
+(function(){
+  function letters(el,txt,off){el.innerHTML=[...txt].map((c,i)=>c===' '?'<span class="sp" style="--i:'+(i+off)+'"></span>':'<span style="--i:'+(i+off)+'">'+c+'</span>').join('')}
+  letters(document.getElementById('logo'),'CRAZY CHEMISTRY',0);
+  document.getElementById('logo').insertAdjacentHTML('beforeend','<i></i>');
+  letters(document.getElementById('i1'),'CRAZY',0);letters(document.getElementById('i2'),'CHEMISTRY',5);
+})();
+</script>
+<script>
+/*__JS__*/
+</script>
+</body>
+</html>
