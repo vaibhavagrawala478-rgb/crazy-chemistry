@@ -60,6 +60,13 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 #glow{pointer-events:none;mix-blend-mode:screen;filter:blur(7px) contrast(1.7) brightness(1.15);opacity:.85}
 .crt{position:absolute;inset:0;pointer-events:none;z-index:3;
   background:repeating-linear-gradient(to bottom,rgba(0,0,0,.2) 0 1px,transparent 1px 3px),radial-gradient(ellipse at center,transparent 62%,rgba(0,0,0,.45) 100%)}
+.flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:6}
+.flash.go{animation:flashgo .7s steps(7) forwards}
+@keyframes flashgo{0%{opacity:1}100%{opacity:0}}
+.pb.chaosb[aria-pressed="true"]{background:var(--pink);border-color:var(--pink);color:#15111c;animation:chaosb .5s steps(1) infinite}
+@keyframes chaosb{0%{background:var(--coral)}25%{background:var(--butter)}50%{background:var(--mint)}75%{background:var(--sky)}100%{background:var(--lilac)}}
+body.chaos .frame{animation:chaosframe .6s steps(1) infinite}
+@keyframes chaosframe{0%{border-color:var(--coral)}20%{border-color:var(--butter)}40%{border-color:var(--mint)}60%{border-color:var(--sky)}80%{border-color:var(--lilac)}100%{border-color:var(--coral)}}
 .ring{position:absolute;border:2px solid #fff;pointer-events:none;mix-blend-mode:difference;transform:translate(-50%,-50%);z-index:4;display:none}
 .ring::after{content:"";position:absolute;left:50%;top:50%;width:4px;height:4px;background:#fff;transform:translate(-50%,-50%)}
 .selbox{position:absolute;border:2px dashed var(--butter);background:rgba(255,212,94,.12);pointer-events:none;z-index:4;display:none}

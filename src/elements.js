@@ -9,7 +9,7 @@ const ELS=[],ID={};
 const CATS=[
   ['lab','LAB','#ffd45e'],['powder','POWDERS','#f2b968'],['liquid','LIQUIDS','#5cc8ff'],['gas','GASES','#8be8c4'],
   ['metal','METALS','#c9d3e0'],['alloy','ALLOYS','#e8b86a'],['mineral','MINERALS','#c2a8c8'],['life','LIFE','#6ee7a0'],['flora','FLORA','#7be07a'],
-  ['boom','BOOM','#ff6a5c'],['demo','DEMOS','#b896ff']
+  ['boom','BOOM','#ff6a5c'],['crazy','CRAZY','#ff4fd8'],['demo','DEMOS','#b896ff']
 ];
 const BEHN=['EMPTY','SOLID','POWDER','LIQUID','GAS','ENERGY','ENERGY'];
 const D_COND=[.012,.3,.15,.5,.03,.8,.8],D_CAP=[1,2,1.6,3,1,1,1];
@@ -86,7 +86,7 @@ dust('copperdust','Cu dust','Copper dust','Cu',8,[210,110,70],'copper',1085,{des
 dust('silverdust','Ag dust','Silver dust','Ag',8,[240,242,248],'silver',962,{desc:'Silver precipitate. It grows in crystals on copper.'});
 dust('golddust','Au dust','Gold dust','Au',9,[255,208,60],'gold',1064,{desc:'Gold powder from aqua regia. Mercury sticks to it.'});
 def('tnt','TNT','TNT','C7H5N3','powder',POWDER,1.6,[196,60,48],{cond:.1,flame:[255,170,60],flameT:1500,
-  burn:{T:240,p:.35,to:'smoke',heat:1400,flame:1,boom:[.35,6],eq:'TNT detonation'},tag:['EXPLOSIVE'],desc:'Stable until heated or lit. Chain-reacts across a pile.'});
+  burn:{T:240,p:.35,to:'smoke',heat:1400,flame:1,boom:[.4,8],eq:'TNT detonation'},tag:['EXPLOSIVE'],desc:'Stable until heated or lit. Chain-reacts across a pile.'});
 
 /* alkali metals sit in the powder family so they can be dropped */
 def('lithium','Lithium','Lithium','Li','metal',POWDER,.53,[160,164,172],{base:1,cond:.7,cap:1.7,conduct:1,flame:[255,50,60],flameT:1100,
@@ -124,7 +124,7 @@ def('ethanol','Ethanol','Ethanol','C2H5OH','liquid',LIQUID,.79,[172,206,236],{ba
   hot:{t:78,to:'ethvapor',p:.3},burn:{T:200,p:.12,to:'void',heat:300,flame:1,eq:'C2H5OH + 3O2 -> 2CO2 + 3H2O'},tag:['FLAMMABLE'],desc:'Alcohol. Evaporates and burns pale blue.'});
 def('glycerin','Glycerin','Glycerin','C3H8O3','liquid',LIQUID,1.26,[226,236,214],{base:1,alpha:.6,cond:.2,cap:2.6,flow:.4,spread:3,desc:'Thick and harmless alone. Nitric acid turns it into nitroglycerin.'});
 def('nitro','Nitro','Nitroglycerin','C3H5N3O9','liquid',LIQUID,1.6,[250,240,150],{alpha:.85,cond:.2,cap:2.4,flow:.6,spread:3,flame:[255,220,120],flameT:1800,
-  burn:{T:150,p:.6,to:'void',heat:1600,flame:1,boom:[.6,7],eq:'4C3H5N3O9 -> 12CO2 + 10H2O + 6N2 + O2'},tag:['EXPLOSIVE'],desc:'Detonates when warmed. Cool hands only.'});
+  burn:{T:150,p:.6,to:'void',heat:1600,flame:1,boom:[.7,10],eq:'4C3H5N3O9 -> 12CO2 + 10H2O + 6N2 + O2'},tag:['EXPLOSIVE'],desc:'Detonates when warmed. Cool hands only.'});
 def('mercury','Mercury','Mercury','Hg','liquid',LIQUID,13.5,[196,202,212],{base:1,cond:.6,cap:1.6,spread:4,conduct:0,hot:{t:357,to:'hgvapor',p:.3},tag:['TOXIC'],
   desc:'Liquid metal, 13x water. Gold floats on it. Picks up gold dust into amalgam.'});
 def('peroxide','H2O2','Hydrogen peroxide','H2O2','liquid',LIQUID,1.45,[172,224,240],{base:1,alpha:.7,cond:.5,cap:2.8,ext:.3,hot:{t:150,to:'oxygen',p:.4},tag:['OXIDISER'],
@@ -232,7 +232,32 @@ def('seed','Seed','Seed','seed','life',POWDER,1,[218,176,90],{base:1,cond:.15,fl
 def('plant','Plant','Plant','leaf','life',STATIC,.8,[70,176,84],{cond:.2,cap:2,flame:[255,150,50],flameT:900,
   burn:{T:240,p:.05,to:'charcoal',heat:220,flame:1,smoke:.4,eq:'Plant matter burns'},desc:'Grows upward while it drinks. Burns, and breathes CO2 into oxygen.'});
 def('dynamite','Dynamite','Dynamite','TNT+','boom',STATIC,1.5,[212,56,52],{base:1,cond:.1,flame:[255,200,100],flameT:1600,
-  burn:{T:180,p:.5,to:'void',heat:1800,flame:1,boom:[1,9],eq:'Dynamite!'},tag:['EXPLOSIVE'],desc:'Solid stick. Big boom.'});
+  burn:{T:180,p:.5,to:'void',heat:1800,flame:1,boom:[1,12],eq:'Dynamite!'},tag:['EXPLOSIVE'],desc:'Solid stick. Big boom.'});
+
+/* ---------------- CRAZY ---------------- */
+def('nuke','Nuke','Nuke','NUKE','crazy',STATIC,9,[112,168,64],{base:1,cond:.2,cap:3,flame:[255,255,220],flameT:3000,
+  burn:{T:260,p:.6,to:'void',heat:3000,flame:1,boom:[1,34],eq:'NUCLEAR DETONATION'},tag:['EXPLOSIVE','HUGE'],desc:'One of these flattens the whole bench. Light it and run.'});
+def('uranium','Uranium','Uranium','U','crazy',POWDER,19,[124,214,84],{base:1,cond:.3,cap:1.6,sp:'uranium',tag:['RADIOACTIVE'],desc:'Warm to the touch. A big enough pile goes critical. Slowly decays into lead.'});
+def('antimatter','Antimatter','Antimatter','ANTI','crazy',POWDER,2,[224,96,255],{base:1,cond:.2,cap:1.6,sp:'anti',tag:['ANNIHILATES'],desc:'Touches anything and both vanish in a blast.'});
+def('blackhole','Black hole','Black hole','HOLE','crazy',STATIC,99,[12,8,22],{base:1,cond:0,cap:5,sp:'bh',tag:['EATS EVERYTHING'],desc:'Drags everything nearby in and deletes it. Even glass.'});
+def('goo','Gray goo','Gray goo','GOO','crazy',LIQUID,1.1,[150,152,166],{base:1,cond:.3,cap:2.4,flow:.35,spread:2,sp:'goo',tag:['SPREADS'],desc:'Turns whatever it touches into more goo. Only the bench stops it.'});
+def('slime','Slime','Slime','SLIME','crazy',LIQUID,1.2,[100,226,98],{base:1,alpha:.92,cond:.3,cap:2.6,flow:.1,spread:2,desc:'Thick, green, harmless and very satisfying.'});
+def('chaos','Chaos','Chaos juice','CHAOS','crazy',LIQUID,1.05,[255,64,200],{base:1,cond:.4,cap:2.6,sp:'chaos',tag:['UNPREDICTABLE'],desc:'Turns whatever it touches into a random element.'});
+def('rainbow','Confetti','Rainbow confetti','FUN','crazy',POWDER,1.2,[255,255,255],{base:1,cond:.1,cap:1.5,desc:'Every grain a different colour. Does absolutely nothing.'});
+def('philstone','Phil stone','Philosopher stone','AU+','crazy',POWDER,3,[210,40,64],{base:1,cond:.3,cap:1.8,sp:'phil',tag:['ALCHEMY'],desc:'Turns metals into gold. Lead included.'});
+def('cloner','Cloner','Cloner','CLONE','crazy',STATIC,5,[255,214,80],{base:1,cond:.3,cap:3,sp:'clone',desc:'Copies the first thing it touches, forever.'});
+def('drain','Drain','Void drain','VOID','crazy',STATIC,5,[26,24,38],{base:1,cond:.1,cap:3,sp:'drain',desc:'Deletes anything that touches it.'});
+def('raincloud','Rain cloud','Rain cloud','RAIN','crazy',STATIC,1,[156,166,184],{base:1,cond:.05,cap:2,sp:'cloud',rain:'water',desc:'Rains water all day.'});
+def('stormcloud','Storm','Storm cloud','STORM','crazy',STATIC,1,[72,76,100],{base:1,cond:.05,cap:2,sp:'cloud',rain:'water',storm:1,tag:['LIGHTNING'],desc:'Rain and the odd lightning bolt.'});
+def('acidcloud','Acid cloud','Acid cloud','ACID','crazy',STATIC,1,[154,200,72],{base:1,cond:.05,cap:2,sp:'cloud',rain:'acid',tag:['CORROSIVE'],desc:'Acid rain, literally.'});
+def('lavacloud','Lava cloud','Lava cloud','LAVA','crazy',STATIC,1,[206,64,40],{base:1,cond:.05,cap:2,sp:'cloud',rain:'lava',tag:['HOT'],desc:'Rains molten rock.'});
+def('firework','Firework','Firework','FIRE!','crazy',POWDER,1.3,[226,60,60],{base:1,cond:.1,cap:1.5,
+  burn:{T:150,p:.35,to:'rocket',heat:200,eq:'FIREWORK LAUNCH'},tag:['FLAMMABLE'],desc:'Light it. A pile goes off one after another.'});
+def('rocket','Rocket','Rocket','ROCKET','-',STATIC,1,[255,232,160],{sp:'rocket',lifeBase:22,cond:.1,cap:1,hide:1});
+def('foam','Foam','Foam','FOAM','crazy',GAS,.0009,[255,214,240],{base:1,alpha:.9,lifeBase:190,desc:'Pink bubbling foam. Elephant toothpaste.'});
+def('cola','Cola','Cola','COLA','crazy',LIQUID,1.04,[72,40,26],{base:1,alpha:.96,cond:.5,cap:3,desc:'Fizzy. Do not add mentos.'});
+def('mentos','Mentos','Mentos','MINT','crazy',POWDER,1.3,[246,246,238],{base:1,cond:.15,cap:1.6,desc:'Drop them into cola. Stand back.'});
+def('plasma','Plasma','Plasma','PLASMA','crazy',FIREB,.0003,[214,134,255],{base:1,tintFire:1,flame:[214,134,255],flameT:4200,lifeBase:30,cond:.8,cap:1,tag:['4000 C'],desc:'Ionised gas hot enough to melt tungsten. It lights and melts everything.'});
 
 const NE=ELS.length;
 const FIRE=ID.fire,SPARK=ID.spark,MOLTEN=ID.molten,OXY=ID.oxygen,GLASS=ID.glass,BENCH=ID.bench,ICE=ID.ice,PLANT=ID.plant;
@@ -276,13 +301,13 @@ const WATERS=['water','saltwater'];
 each(WATERS,w=>{
   rx('lithium',w,{a:'hydrogen',b:'base',p:.12,heat:90,flame:'lithium',eq:'2Li + 2H2O -> 2LiOH + H2'});
   rx('sodium',w,{a:'hydrogen',b:'base',p:.3,heat:220,flame:'sodium',boom:[.012,3],eq:'2Na + 2H2O -> 2NaOH + H2 (violent)'});
-  rx('potassium',w,{a:'hydrogen',b:'base',p:.5,heat:380,flame:'potassium',boom:[.05,4],eq:'2K + 2H2O -> 2KOH + H2 (explosive)'});
+  rx('potassium',w,{a:'hydrogen',b:'base',p:.5,heat:380,flame:'potassium',boom:[.1,6],eq:'2K + 2H2O -> 2KOH + H2 (explosive)'});
   rx('calcium',w,{a:'hydrogen',b:'limewater',p:.1,heat:70,eq:'Ca + 2H2O -> Ca(OH)2 + H2'});
 });
 each(WATERS,w=>{
-  rx('rubidium',w,{a:'hydrogen',b:'base',p:.55,heat:420,flame:'rubidium',boom:[.07,5],eq:'2Rb + 2H2O -> 2RbOH + H2 (explosive)'});
-  rx('cesium',w,{a:'hydrogen',b:'base',p:.6,heat:480,flame:'cesium',boom:[.15,6],eq:'2Cs + 2H2O -> 2CsOH + H2 (detonates)'});
-  rx('francium',w,{a:'hydrogen',b:'base',p:.7,heat:600,flame:'francium',boom:[.25,7],eq:'2Fr + 2H2O -> 2FrOH + H2 (catastrophic)'});
+  rx('rubidium',w,{a:'hydrogen',b:'base',p:.55,heat:420,flame:'rubidium',boom:[.12,7],eq:'2Rb + 2H2O -> 2RbOH + H2 (explosive)'});
+  rx('cesium',w,{a:'hydrogen',b:'base',p:.6,heat:480,flame:'cesium',boom:[.2,9],eq:'2Cs + 2H2O -> 2CsOH + H2 (detonates)'});
+  rx('francium',w,{a:'hydrogen',b:'base',p:.7,heat:600,flame:'francium',boom:[.35,12],eq:'2Fr + 2H2O -> 2FrOH + H2 (catastrophic)'});
   rx('barium',w,{a:'hydrogen',b:'limewater',p:.12,heat:80,eq:'Ba + 2H2O -> Ba(OH)2 + H2'});
   rx('strontium',w,{a:'hydrogen',b:'base',p:.1,heat:70,eq:'Sr + 2H2O -> Sr(OH)2 + H2'});
 });
@@ -378,7 +403,7 @@ rx('mercury','aluminum',{b:'ash',p:.03,eq:'4Al + 3O2 -> 2Al2O3 (mercury strips t
 rx('nitrogen','hydrogen',{a:'nh3',b:'nh3',minT:400,p:.03,eq:'N2 + 3H2 -> 2NH3 (Haber)'});
 rx('nh3','water',{a:'void',b:'base',p:.05});
 /* gas fire reactions */
-rx('hydrogen','oxygen',{a:'steam',b:'steam',p:.8,minT:450,heat:1200,flame:'hydrogen',boom:[.25,4],eq:'2H2 + O2 -> 2H2O (explosive)'});
+rx('hydrogen','oxygen',{a:'steam',b:'steam',p:.8,minT:450,heat:1200,flame:'hydrogen',boom:[.3,6],eq:'2H2 + O2 -> 2H2O (explosive)'});
 rx('methane','oxygen',{a:'co2',b:'steam',p:.6,minT:460,heat:900,flame:'methane',boom:[.12,3],eq:'CH4 + 2O2 -> CO2 + 2H2O'});
 rx('acetylene','oxygen',{a:'co2',b:'steam',p:.7,minT:305,heat:1600,flame:'acetylene',boom:[.15,4],eq:'2C2H2 + 5O2 -> 4CO2 + 2H2O (3000 C)'});
 /* electrolysis */
@@ -397,6 +422,9 @@ rx('phosacid','chalk',{a:'co2',b:'saltwater',p:.2,heat:10,eq:'3CaCO3 + 2H3PO4 ->
 rx('phosacid','zinc',{a:'hydrogen',b:'void',p:.03,heat:10});
 rx('phosacid','magnesium',{a:'hydrogen',b:'void',p:.1,heat:20});
 rx('toluene','nitricacid',{a:'tnt',b:'void',p:.04,heat:80,eq:'C7H8 + 3HNO3 -> C7H5N3O6 + 3H2O (nitration, TNT)'});
+/* crazy */
+rx('peroxide','yeast',{a:'foam',p:.25,emit:'foam',heat:30,eq:'ELEPHANT TOOTHPASTE (H2O2 + yeast catalyst)'});
+rx('cola','mentos',{a:'foam',b:'void',p:.5,emit:'foam',boom:[.02,2],eq:'COLA + MENTOS ERUPTION'});
 /* life */
 rx('seed','water',{a:'plant',b:'void',p:.04,eq:'Seed + water -> shoot'});
 rx('seed','mud',{a:'plant',b:'dirt',p:.07,eq:'Seed + mud -> shoot'});

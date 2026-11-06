@@ -97,7 +97,9 @@ function growPlant(i,x,y,w){
 }
 
 /* explosions */
+let lastBig=-999;
 function boom(cx,cy,r){
+  if(r>=20){if(frame-lastBig<40)return;lastBig=frame}
   const r2=r*r;
   for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){
     const d2=dx*dx+dy*dy;if(d2>r2)continue;
@@ -105,6 +107,10 @@ function boom(cx,cy,r){
     const k=y*W+x,tt=type[k];if(tt===BENCH||ELS[tt].fixedT!==undefined)continue;
     const d=Math.sqrt(d2)/r,e=ELS[tt];
     if(e.beh===STATIC){
+      if(r>=10){
+        if(d<.55){setCell(k,FIRE,0);life[k]=14+((rnd()*18)|0);T[k]=2000;continue}
+        if(d<.92&&rnd()<.4){setCell(k,ID.sand);T[k]=400;continue}
+      }
       if(tt===GLASS&&rnd()<(1-d)*.9&&r>=3){setCell(k,ID.sand);T[k]+=300}else T[k]+=600*(1-d);
       continue;
     }
@@ -203,6 +209,108 @@ function pulse(k){
   const tk=type[k];
   if(tk!==SPARK&&ELS[tk].conduct&&life[k]===0){setCell(k,SPARK,tk);life[k]=2;T[k]=Math.max(T[k],60)}
 }
+
+/* ---------------- crazy specials ---------------- */
+const RANDPOOL=ELS.filter(e=>e.id>0&&!e.hide&&e.fixedT===undefined&&!e.sp&&!e.tintFire&&['powder','liquid','gas','metal','alloy','mineral','boom'].includes(e.cat)&&e.id!==BENCH).map(e=>e.id);
+const FWTINTS=['lithium','sodium','potassium','strontium','barium','coppersulfate','cesium','calcium','rubidium'].map(k=>ID[k]);
+function burst(x,y,tint){
+  const t2=FWTINTS[(rnd()*FWTINTS.length)|0];
+  for(let n=0;n<90;n++){
+    const a=rnd()*6.2832,r=2+rnd()*9,px=Math.round(x+Math.cos(a)*r),py=Math.round(y+Math.sin(a)*r*.9);
+    if(px<0||px>=W||py<0||py>=H)continue;
+    const k=py*W+px;if(type[k]!==0)continue;
+    const tn=rnd()<.28?t2:tint;
+    setCell(k,FIRE,tn);life[k]=12+((rnd()*22)|0);T[k]=ELS[tn].flameT||1000;
+  }
+  onBoom(1);
+}
+function meteor(cx,cy){
+  const sx=cx+(rnd()<.5?-1:1)*(30+((rnd()*60)|0));
+  const n=Math.max(4,cy);
+  for(let s=0;s<=n;s++){
+    const x=Math.round(sx+(cx-sx)*s/n),y=Math.round(s*cy/n);
+    for(let q=0;q<2;q++){const xx=x+q;if(xx<0||xx>=W||y<0||y>=H)continue;const k=y*W+xx;if(type[k]===0){setCell(k,FIRE,0);life[k]=14+((rnd()*10)|0);T[k]=1800}}
+  }
+  circle(cx,cy,5,k=>{if(type[k]!==BENCH){made(k,MOLTEN,ID.stone);T[k]=1900}});
+  boom(cx,cy,10);
+  note('meteor','METEOR IMPACT');
+}
+function special(i,x,y,t,e){
+  switch(e.sp){
+    case 'uranium':{
+      T[i]+=3;
+      let n=0;
+      for(let q=0;q<8;q++){const d=DIRS8[q],nx=x+d[0],ny=y+d[1];if(nx>=0&&nx<W&&ny>=0&&ny<H&&type[ny*W+nx]===t)n++}
+      if(n>=6&&rnd()<.0006*(n-5)){boom(x,y,16);note('crit','CRITICAL MASS');return true}
+      if(rnd()<.0012){made(i,ID.lead);T[i]+=200;const k=rn(i,x,y);if(k>=0&&type[k]===0){setCell(k,SPARK,0);life[k]=5;T[k]=1100}return true}
+      return false}
+    case 'anti':{
+      const j=rn(i,x,y);
+      if(j>=0){const tj=type[j];if(tj!==0&&tj!==BENCH&&ELS[tj].fixedT===undefined){setCell(i,0);setCell(j,0);boom(x,y,4);note('anti','ANNIHILATION');return true}}
+      return false}
+    case 'bh':{
+      for(let n=0;n<60;n++){
+        const dx=((rnd()*97)|0)-48,dy=((rnd()*97)|0)-48;if(!dx&&!dy)continue;
+        const px=x+dx,py=y+dy;if(px<0||px>=W||py<0||py>=H)continue;
+        const q=py*W+px,tq=type[q];
+        if(tq===0||tq===t||tq===BENCH||ELS[tq].fixedT!==undefined)continue;
+        if(Math.abs(dx)<=1&&Math.abs(dy)<=1){setCell(q,0);T[q]=20;continue}
+        if(ELS[tq].beh===STATIC)continue;
+        const nx=px-Math.sign(dx),ny=py-Math.sign(dy),tg=ny*W+nx;
+        if(type[tg]===0)swap(q,tg);else if(tg!==i&&ELS[type[tg]].beh!==STATIC&&type[tg]!==t){setCell(q,0)}
+      }
+      /* swallow adjacent solids too */
+      const j=rn(i,x,y);if(j>=0&&type[j]!==0&&type[j]!==t&&type[j]!==BENCH&&ELS[type[j]].fixedT===undefined){setCell(j,0)}
+      return true}
+    case 'goo':{
+      const j=rn(i,x,y);
+      if(j>=0){const tj=type[j];if(tj!==0&&tj!==t&&tj!==BENCH&&ELS[tj].fixedT===undefined&&rnd()<.07){setCell(j,t)}}
+      return false}
+    case 'chaos':{
+      const j=rn(i,x,y);
+      if(j>=0){const tj=type[j];
+        if(tj!==0&&tj!==t&&tj!==BENCH&&ELS[tj].fixedT===undefined&&rnd()<.06){
+          const id=RANDPOOL[(rnd()*RANDPOOL.length)|0];setCell(j,id);T[j]=ELS[id].initT!==undefined?ELS[id].initT:20;found(id);note('chaos','CHAOS: '+ELS[id].name.toUpperCase())}}
+      if(rnd()<.004){const id=RANDPOOL[(rnd()*RANDPOOL.length)|0];if(ELS[id].beh!==STATIC){setCell(i,id);T[i]=20;return true}}
+      return false}
+    case 'phil':{
+      const j=rn(i,x,y);
+      if(j>=0){const tj=type[j],te=ELS[tj];
+        if(tj===MOLTEN&&aux[j]!==ID.gold&&rnd()<.2){aux[j]=ID.gold;note('alch','ALCHEMY')}
+        else if((te.cat==='metal'||te.cat==='alloy')&&tj!==ID.gold&&tj!==t&&te.id!==ID.mercury&&(te.beh===STATIC||te.beh===POWDER)&&rnd()<.12){
+          const tt=T[j];made(j,ID.gold);T[j]=tt;note('alch','ALCHEMY: '+te.name.toUpperCase()+' INTO GOLD')}}
+      return false}
+    case 'clone':{
+      const j=rn(i,x,y);if(j<0)return true;
+      if(!aux[i]){const tj=type[j];if(tj!==0&&tj!==t&&tj!==BENCH&&tj!==MOLTEN&&tj!==FIRE&&tj!==SPARK)aux[i]=tj}
+      else if(type[j]===0&&rnd()<.3){const id=aux[i];setCell(j,id);const e2=ELS[id];T[j]=e2.initT!==undefined?e2.initT:20}
+      return true}
+    case 'drain':{
+      const j=rn(i,x,y);
+      if(j>=0){const tj=type[j];if(tj!==0&&tj!==t&&tj!==BENCH&&ELS[tj].fixedT===undefined){setCell(j,0);T[j]=20}}
+      return true}
+    case 'cloud':{
+      if(y<H-1&&rnd()<.12){
+        const j=i+W+((rnd()*3|0)-1);
+        if(j>=0&&j<N&&type[j]===0){
+          if(e.rain==='lava'){made(j,MOLTEN,ID.stone);T[j]=1400}else{made(j,ID[e.rain]);T[j]=20}
+        }
+      }
+      if(e.storm&&rnd()<.0007)lightning(x,Math.min(H-8,y+14+((rnd()*70)|0)));
+      return true}
+    case 'rocket':{
+      if(!aux[i])aux[i]=FWTINTS[(rnd()*FWTINTS.length)|0];
+      if(--life[i]<=0||life[i]>200){burst(x,y,aux[i]);setCell(i,0);return true}
+      const dx=rnd()<.15?(rnd()<.5?-1:1):0,nx=x+dx;
+      if(y<=0||nx<0||nx>=W){burst(x,y,aux[i]);setCell(i,0);return true}
+      const tg=(y-1)*W+nx;
+      if(type[tg]!==0){burst(x,y,aux[i]);setCell(i,0);return true}
+      swap(i,tg);
+      setCell(i,FIRE,aux[tg]);life[i]=7+((rnd()*5)|0);T[i]=900;
+      return true}
+  }
+  return false;
+}
 function updateCell(i,x,y,t){
   const e=ELS[t];
   if(t===SPARK){
@@ -223,6 +331,7 @@ function updateCell(i,x,y,t){
   }
   if(e.emit){if((frame%e.emit)===0)energise(x,y);return}
   if(e.conduct&&life[i]>0)life[i]--;
+  if(e.sp&&special(i,x,y,t,e))return;
   const Ti=T[i];
   if(t===MOLTEN){
     const src=aux[i],se=ELS[src];
@@ -335,6 +444,9 @@ for(const e of ELS){
     PAL[e.id*8+v]=pack(c[0],c[1],c[2]);
   }
 }
+const RBOW=[[255,70,70],[255,160,50],[255,230,60],[90,220,90],[60,200,255],[90,100,255],[190,90,255],[255,100,200]];
+for(const k of ['rainbow','chaos'])for(let v=0;v<8;v++){const c=RBOW[v];PAL[ID[k]*8+v]=pack(c[0],c[1],c[2])}
+const CHAOSID=ID.chaos;
 let R=0,Gc=0,B=0;
 function ramp(st,t){
   if(t<=st[0][0]){R=st[0][1];Gc=st[0][2];B=st[0][3];return}
@@ -369,6 +481,7 @@ function render(){
           const fl=.55+rnd()*.45;
           c=pack(Math.min(255,fc[0]*fl*(.6+lf*.5)+lf*40),Math.min(255,fc[1]*fl*(.5+lf*.6)+lf*40),Math.min(255,fc[2]*fl*(.5+lf*.5)+lf*30));
         }else if(t===WOODID&&aux[i]>0){c=TRUNKPAL[aux[i]*8+vr[i]];
+        }else if(t===CHAOSID){c=PAL[t*8+((vr[i]+(frame>>3))&7)];
         }else if(t===SEEDID&&aux[i]>0){c=LEAFPAL[aux[i]*8+vr[i]];
         }else if(t===PLANT){c=LEAFPAL[aux[i]*8+vr[i]];
         }else if(t===BLOOM){c=BLOOMPAL[aux[i]*8+vr[i]];

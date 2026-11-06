@@ -19,6 +19,7 @@
       <button class="pb" id="bThermal" aria-pressed="false"><span>THERMAL</span></button>
       <button class="pb" id="bHood" aria-pressed="true"><span>HOOD</span></button>
       <button class="pb" id="bClear"><span>CLEAR</span></button>
+      <button class="pb chaosb" id="bChaos" aria-pressed="false"><span>CHAOS</span></button>
       <div class="seg" id="speed"><button data-s="0.5">.5X</button><button data-s="1" class="on">1X</button><button data-s="2">2X</button><button data-s="3">3X</button></div>
       <label class="rng">BRUSH <input type="range" id="brush" min="1" max="14" value="4" aria-label="Brush size"><b id="bval" style="font-weight:400;width:24px">4</b></label>
       <button class="pb" id="bMute" aria-pressed="false"><span>SFX ON</span></button>
@@ -32,6 +33,7 @@
         <canvas id="sim" width="384" height="240"></canvas>
         <canvas id="glow" width="192" height="120"></canvas>
         <div class="crt"></div>
+        <div class="flash" id="flash"></div>
         <div class="ring" id="ring"></div>
         <div class="selbox" id="selbox"></div>
         <div class="tr"><b id="fps">60</b> FPS  <b id="cnt">0</b> PARTICLES</div>

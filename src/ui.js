@@ -36,7 +36,9 @@ function sfxBoom(r){
   s.buffer=buf;s.connect(f);f.connect(g);g.connect(a.destination);s.start();
 }
 function sfxClick(){blip(660,.05,'square',.03)}
-onBoom=r=>{sfxBoom(r);if(r>=3)shake(r)};
+const flashEl=$('#flash');
+function doFlash(){flashEl.classList.remove('go');void flashEl.offsetWidth;flashEl.classList.add('go')}
+onBoom=r=>{sfxBoom(r);if(r>=3)shake(r);if(r>=10)doFlash()};
 
 /* ---------- screen shake ---------- */
 const frameEl=$('#frame');
@@ -49,6 +51,7 @@ const TOOLS=[
   {kind:'cool',nm:'Chiller',name:'Chiller',sym:'-HEAT',col:[92,200,255],desc:'Pulls heat out. Freezes water and solidifies melts.',tag:['-90 C / TICK']},
   {kind:'erase',nm:'Eraser',name:'Eraser',sym:'ERASE',col:[246,239,224],desc:'Removes anything under the brush, glass and benches too.'},
   {kind:'vial',nm:'Vial',name:'Vial capture',sym:'[  ]',col:[255,212,94],desc:'Drag a box round some chemicals to bottle them. Then click the vial in the rack and hold on the bench to pour it out.'},
+  {kind:'meteor',nm:'Meteor',name:'Meteor strike',sym:'ROCK',col:[255,150,60],desc:'Click to drop a meteor. Craters the bench and leaves molten rock.'},
   {kind:'bolt',nm:'Lightning',name:'Lightning',sym:'ZZAP',col:[160,255,255],desc:'Click to drop a lightning bolt from the sky. Lights fuel, shatters glass, runs down metal.'},
   {kind:'stamp',stamp:'beaker',nm:'Beaker',name:'Beaker',sym:'U',col:[150,205,215],desc:'Click to place a glass beaker.'},
   {kind:'stamp',stamp:'tube',nm:'Test tube',name:'Test tube',sym:'I',col:[150,205,215],desc:'Click to place a test tube.'},
@@ -57,7 +60,7 @@ const TOOLS=[
 for(const t of TOOLS)items.push({cat:'lab',kind:'tool',tool:t,nm:t.nm,name:t.name,sym:t.sym,col:t.col,desc:t.desc,tag:t.tag||[],state:'TOOL'});
 for(const e of ELS){
   if(e.hide||e.cat==='-'||e.id===0)continue;
-  items.push({cat:e.cat,kind:'el',el:e,tool:{kind:'el',id:e.id},nm:e.nm||e.name,name:e.name,sym:e.sym,col:e.col,desc:e.desc,tag:e.tag||[],state:BEHN[e.beh]});
+  items.push({cat:e.cat,kind:'el',el:e,tool:e.tintFire?{kind:'el',id:FIRE,aux:e.id}:{kind:'el',id:e.id},nm:e.nm||e.name,name:e.name,sym:e.sym,col:e.col,desc:e.desc,tag:e.tag||[],state:BEHN[e.beh]});
 }
 
 for(let s=1;s<=NS;s++){
@@ -102,6 +105,23 @@ const SCENES=[
    for(let x=b.x0-1;x<=b.x1+1;x++){glassPut(x,176);glassPut(x,177)}
    fillRect(b.x0,178,b.x1,b.y1,'hydrogen',1);for(let y=178;y<=b.y1;y++)for(let x=b.x0;x<=b.x1;x++)if(rnd()<.33)setCell(y*W+x,OXY);
    setT(188,208,192,212,700)}},
+ {n:'Fireworks',d:'Light the pile',f(){clearAll();fillRect(20,230,365,231,'bench');fillRect(120,220,260,229,'firework');setT(190,224,194,228,400)}},
+ {n:'Nuke the town',d:'Concrete city, one nuke',f(){clearAll();fillRect(10,228,375,231,'stone');
+   [[30,150],[62,170],[96,140],[270,160],[300,175],[336,145]].forEach(([x,h])=>{fillRect(x,228-h/2,x+22,227,'concrete');for(let y=228-h/2+4;y<226;y+=8)fillRect(x+4,y,x+7,y+3,'glass')});
+   fillRect(176,222,206,227,'nuke');setT(186,224,190,226,400)}},
+ {n:'Black hole',d:'Everything goes in',f(){clearAll();fillRect(10,228,375,231,'stone');fillRect(130,200,230,227,'sand');const b=beaker(310,227,60,50);fillRect(b.x0,b.y1-24,b.x1,b.y1,'water');
+   fillRect(150,120,180,126,'oil',.6);setCell(150*W+190,ID.blackhole)}},
+ {n:'Alchemy',d:'Philosopher stone on metals',f(){clearAll();fillRect(40,200,340,203,'stone');
+   ['lead','iron','copper','tin','zinc','aluminum'].forEach((m,i)=>fillRect(60+i*48,184,86+i*48,199,m));
+   fillRect(60,160,340,168,'philstone',.4)}},
+ {n:'Elephant paste',d:'Peroxide + yeast foam',f(){clearAll();const b=tube(190,232,34,84);fillRect(b.x0,b.y1-60,b.x1,b.y1,'peroxide');fillRect(178,110,202,118,'yeast')}},
+ {n:'Mentos geyser',d:'Cola + mentos',f(){clearAll();const b=tube(190,232,30,100);fillRect(b.x0,b.y1-78,b.x1,b.y1,'cola');fillRect(176,70,204,84,'mentos')}},
+ {n:'Meltdown',d:'Uranium goes critical',f(){clearAll();fillRect(20,228,365,231,'stone');fillRect(170,206,210,227,'uranium')}},
+ {n:'Weather',d:'Rain, storm, acid and lava',f(){clearAll();fillRect(10,228,375,231,'stone');
+   fillRect(30,24,110,30,'raincloud');fillRect(120,24,200,30,'stormcloud');fillRect(210,24,290,30,'acidcloud');fillRect(300,24,365,30,'lavacloud');
+   fillRect(40,214,70,227,'iron');fillRect(130,214,160,227,'gold');fillRect(220,214,250,227,'copper');fillRect(310,214,350,227,'stone')}},
+ {n:'Gray goo',d:'Contain it. Good luck.',f(){clearAll();const b=beaker(190,232,120,80);fillRect(b.x0,b.y1-30,b.x1,b.y1,'water');fillRect(150,200,160,206,'sand');fillRect(238,150,244,156,'goo')}},
+ {n:'Chaos juice',d:'Everything it touches mutates',f(){clearAll();const b=beaker(190,232,120,70);fillRect(b.x0,b.y1-34,b.x1,b.y1,'water');fillRect(b.x0+8,b.y1-6,b.x1-8,b.y1-2,'sand');fillRect(150,120,170,126,'chaos',.8)}},
 ];
 for(const s of SCENES)items.push({cat:'demo',kind:'demo',scene:s,nm:s.n,name:s.n,sym:'DEMO',col:[184,150,255],desc:s.d.toUpperCase(),tag:[],state:'DEMO'});
 function startBench(){
@@ -176,7 +196,7 @@ function inspect(it){
 }
 function setTool(t){
   tool=t;if(t.kind!=='pour')lastTool=t;
-  const m=t.kind==='pour'?'POUR VIAL '+(t.slot+1):{el:'BRUSH',heat:'HEAT GUN',cool:'CHILLER',erase:'ERASER',vial:'VIAL CAPTURE',stamp:'PLACE GLASS',bolt:'LIGHTNING'}[t.kind];
+  const m=t.kind==='pour'?'POUR VIAL '+(t.slot+1):{el:'BRUSH',heat:'HEAT GUN',cool:'CHILLER',erase:'ERASER',vial:'VIAL CAPTURE',stamp:'PLACE GLASS',bolt:'LIGHTNING',meteor:'METEOR'}[t.kind];
   $('#hmode').textContent=m;updateRing();
 }
 
@@ -313,6 +333,7 @@ window.addEventListener('keydown',e=>{
   else if(k==='c')$('#bClear').click();
   else if(k==='x')codexToggle();
   else if(k==='m')$('#bMute').click();
+  else if(k==='k')$('#bChaos').click();
   else if(k==='.'){setPause(true);stepOnce=true}
   else if(k==='escape')codexToggle(false);
 });
@@ -351,6 +372,7 @@ cvEl.addEventListener('pointerdown',e=>{
   const [x,y]=cellFrom(e);ptr.down=true;ptr.x=ptr.px=x;ptr.y=ptr.py=y;ptr.sx=x;ptr.sy=y;ptr.inside=true;ptr.cx=x;ptr.cy=y;
   if(tool.kind==='stamp'){const [fn,[w,h]]=STAMPS[tool.stamp];fn(x,Math.min(H-1,y+(h>>1)),w,h);ptr.down=false}
   else if(tool.kind==='bolt'){lightning(x,y);ptr.down=false}
+  else if(tool.kind==='meteor'){meteor(x,y);ptr.down=false}
   else if(tool.kind==='vial')selbox.style.display='block';
   updateRing();
 });
@@ -384,11 +406,32 @@ function hoverInfo(){
   $('#hxy').textContent=ptr.cx+','+ptr.cy;
 }
 
+/* ---------- chaos mode ---------- */
+let chaos=false,chaosT=40;
+$('#bChaos').onclick=function(){sfxClick();chaos=!chaos;this.setAttribute('aria-pressed',chaos);document.body.classList.toggle('chaos',chaos);note('chaos0',chaos?'CHAOS MODE ON':'CHAOS MODE OFF')};
+function rainRandom(cx){
+  const id=RANDPOOL[(rnd()*RANDPOOL.length)|0],e=ELS[id];
+  circle(cx,5,10,k=>{if(type[k]===0&&rnd()<.6){setCell(k,id);T[k]=e.initT!==undefined?e.initT:20}});
+  note('rain','IT IS RAINING '+U(e.name));
+}
+function chaosTick(){
+  if(--chaosT>0)return;
+  chaosT=45+((rnd()*90)|0);
+  const r=rnd(),x=24+((rnd()*(W-48))|0),y=70+((rnd()*150)|0);
+  if(r<.22)lightning(x,y);
+  else if(r<.42)meteor(x,y);
+  else if(r<.78)rainRandom(x);
+  else if(r<.9)boom(x,y,9+((rnd()*10)|0));
+  else if(r<.95){setCell(((60+((rnd()*100)|0))*W)+x,ID.blackhole);note('bh','A BLACK HOLE APPEARS')}
+  else{circle(x,40,3,k=>{if(type[k]===0){setCell(k,FIRE,ID.plasma);life[k]=30;T[k]=4200}});note('plasma','PLASMA')}
+}
+
 /* ---------- main loop ---------- */
 let fpsN=0,fpsT=performance.now();
 function loop(ts){
   requestAnimationFrame(loop);
   if(ptr.down)applyTool();
+  if(chaos&&!paused)chaosTick();
   if(!paused){speedAcc+=speed;while(speedAcc>=1){step();speedAcc-=1}}
   else if(stepOnce){step();stepOnce=false}
   const c=render();

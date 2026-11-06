@@ -4,11 +4,12 @@ A pixel chemistry lab in the browser. Mix, melt, shock and bottle 100+ elements,
 
 - Falling-sand simulation with heat, phase changes, fire, explosions and electricity
 - 135 elements including 30 metals (alkali, alkaline earth, transition, post-transition) and 8 alloys, and about 190 reactions
+- A CRAZY tab: nuke, black hole, antimatter, uranium meltdown, gray goo, chaos juice, philosopher's stone, cloner, fireworks, elephant toothpaste, mentos geysers, storm/acid/lava clouds, plasma, plus meteor strikes and a CHAOS mode that rains disasters on the lab
 - 188 plant species (Abelia to ZZ Plant) with their own look and growth habit: trees, shrubs, flowers, grasses, cacti, vines, crops
 - Household and industrial chemicals: salt, baking soda, vinegar, bleach, lye, acids, ethanol, peroxide, chalk, Epsom salt, ammonia, acetone, methanol, toluene and more
 - A Codex of 38 discoverable compounds and a Herbarium that tracks which plants you have grown
 - Vial rack for storing and pouring chemicals
-- 14 ready-made experiments, including an alkali metal race and a greenhouse
+- 24 ready-made experiments, including an alkali metal race, a greenhouse, fireworks, a nuke and a black hole
 
 ## Run
 
