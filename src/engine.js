@@ -41,12 +41,29 @@ function tryGrowFrom(i,x,y,sp){
   const f=SPF[sp],b=life[i];
   if(b===0){if(rnd()<.05)bloomAt(i,x,y,sp);return false}
   let dx=0,dy=-1,t=PLANT;
+  const bud=BUD[sp];
   switch(f){
     case 'T':
-      if(b>BUD[sp]*.42){t=WOODID;dx=rnd()<.2?(rnd()<.5?-1:1):0;dy=-1}
+      if(b>bud*.42){t=WOODID;dx=rnd()<.2?(rnd()<.5?-1:1):0;dy=-1}
       else{const d=DIRS8[(rnd()*8)|0];dx=d[0];dy=d[1]}
       break;
-    case 'F':case 'E':case 'K':dx=rnd()<(f==='K'?.12:.1)?(rnd()<.5?-1:1):0;dy=-1;break;
+    case 'C':                       /* conifer: straight trunk, then a tall narrow crown */
+      if(b>bud*.78){t=WOODID;dx=0;dy=-1}
+      else{const r=rnd();dy=r<.5?-1:(r<.8?0:-1);dx=rnd()<.55?(rnd()<.5?-1:1):0}
+      break;
+    case 'M':                       /* palm: bare trunk, fronds arch out at the top */
+      if(b>bud*.2){t=WOODID;dx=rnd()<.06?(rnd()<.5?-1:1):0;dy=-1}
+      else{const a=[[-1,-1],[1,-1],[-1,0],[1,0],[0,-1],[-2,0],[2,0]][(rnd()*7)|0];dx=a[0];dy=a[1]}
+      break;
+    case 'K':{                      /* cactus: fat green column, an arm now and then */
+      const r=rnd();
+      if(r<.3){dx=rnd()<.5?-1:1;dy=0}else{dx=0;dy=-1}
+      break}
+    case 'R':{                      /* rosette or ball: stays low and wide */
+      const r=rnd();dx=r<.4?-1:(r<.8?1:0);dy=rnd()<.35?-1:0;
+      if(!dx&&!dy)dy=-1;
+      break}
+    case 'F':case 'E':dx=rnd()<.1?(rnd()<.5?-1:1):0;dy=-1;break;
     case 'G':{const r=rnd();dx=r<.4?-1:(r<.8?1:0);dy=rnd()<.5?-1:0;break}
     case 'S':case 'P':{const d=DIRS8[(rnd()*8)|0];dx=d[0];dy=d[1]>0?0:d[1];break}
     case 'V':{const r=rnd();dx=r<.4?-1:(r<.8?1:0);dy=rnd()<.55?0:(rnd()<.5?-1:1);break}
@@ -55,6 +72,7 @@ function tryGrowFrom(i,x,y,sp){
   const nx=x+dx,ny=y+dy;if(nx<0||nx>=W||ny<0||ny>=H)return false;
   const k=ny*W+nx;if(type[k]!==0)return false;
   setCell(k,t,sp);T[k]=20;life[k]=b-1;life[i]=b-1;
+  if(f==='K'&&dy===-1){const sx=nx+(rnd()<.5?-1:1);if(sx>=0&&sx<W){const k2=ny*W+sx;if(type[k2]===0){setCell(k2,PLANT,sp);T[k2]=20;life[k2]=b-1}}}
   if(b-1<=((BUD[sp]*.35)|0)){if(sp&&!GROWN[sp]){GROWN[sp]=1;onGrown(sp)}if(rnd()<.5)bloomAt(k,nx,ny,sp)}
   return true;
 }
@@ -350,6 +368,7 @@ function render(){
           const fe=ELS[aux[i]],fc=fe.flame||ELS[FIRE].flame,lf=Math.min(1,life[i]/26);
           const fl=.55+rnd()*.45;
           c=pack(Math.min(255,fc[0]*fl*(.6+lf*.5)+lf*40),Math.min(255,fc[1]*fl*(.5+lf*.6)+lf*40),Math.min(255,fc[2]*fl*(.5+lf*.5)+lf*30));
+        }else if(t===WOODID&&aux[i]>0){c=TRUNKPAL[aux[i]*8+vr[i]];
         }else if(t===PLANT){c=LEAFPAL[aux[i]*8+vr[i]];
         }else if(t===BLOOM){c=BLOOMPAL[aux[i]*8+vr[i]];
         }else if(t===SPARK){

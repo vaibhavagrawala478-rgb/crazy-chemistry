@@ -96,7 +96,7 @@ const SCENES=[
  {n:'Alkali race',d:'Li, Na, K, Rb, Cs in water',f(){clearAll();
    ['lithium','sodium','potassium','rubidium','cesium'].forEach((m,i)=>{const cx=64+i*64;const b=beaker(cx,232,48,48);fillRect(b.x0,b.y1-26,b.x1,b.y1,'water');fillRect(cx-3,150-i*4,cx+2,155-i*4,m)})}},
  {n:'Greenhouse',d:'Seeds on wet soil',f(){clearAll();fillRect(18,196,19,231,'bench');fillRect(364,196,365,231,'bench');fillRect(18,230,365,231,'bench');
-   ['Teddy Bear Sunflower','Daffodil','Dahlia','Pansy','Cactus','Paper Birch','Kale','Zinnia','Lantana','Jade Plant','Venus Fly Trap','Delphinium','Okra','Bacopa','Pampas Grass','Date Palm'].forEach((n,i)=>{const q=spId(n);if(q>0)setCell(205*W+(42+i*20),ID.seed,q)});
+   ['Teddy Bear Sunflower','Daffodil','Cactus','Paper Birch','Echeveria','Eastern White Pine','Dahlia','Date Palm','Pampas Grass','Kale','Delphinium','Venus Fly Trap','Lantana','Okra','Pansy','Neon Pothos'].forEach((n,i)=>{const q=spId(n);if(q>0)setCell(205*W+(42+i*20),ID.seed,q)});
    fillRect(20,206,363,229,'mud')}},
  {n:'Spark bottle',d:'H2 + O2 in a tube',f(){clearAll();const b=beaker(190,232,64,60);
    for(let x=b.x0-1;x<=b.x1+1;x++){glassPut(x,176);glassPut(x,177)}
