@@ -27,7 +27,7 @@ function spawnGas(i,x,y,id){
   return false;
 }
 const DIRS8=[[0,-1],[1,-1],[-1,-1],[1,0],[-1,0],[0,1],[1,1],[-1,1]];
-const BLOOM=ID.bloom,WOODID=ID.wood;
+const BLOOM=ID.bloom,WOODID=ID.wood,SEEDID=ID.seed;
 function bloomAt(i,x,y,sp){
   const bc=SPB[sp];if(!bc)return;
   for(let n=0;n<2;n++){
@@ -369,6 +369,7 @@ function render(){
           const fl=.55+rnd()*.45;
           c=pack(Math.min(255,fc[0]*fl*(.6+lf*.5)+lf*40),Math.min(255,fc[1]*fl*(.5+lf*.6)+lf*40),Math.min(255,fc[2]*fl*(.5+lf*.5)+lf*30));
         }else if(t===WOODID&&aux[i]>0){c=TRUNKPAL[aux[i]*8+vr[i]];
+        }else if(t===SEEDID&&aux[i]>0){c=LEAFPAL[aux[i]*8+vr[i]];
         }else if(t===PLANT){c=LEAFPAL[aux[i]*8+vr[i]];
         }else if(t===BLOOM){c=BLOOMPAL[aux[i]*8+vr[i]];
         }else if(t===SPARK){
