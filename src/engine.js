@@ -8,7 +8,7 @@ const KNOWN=new Uint8Array(NE);
 for(const e of ELS)if(e.base||e.hide||e.id===0)KNOWN[e.id]=1;
 let cur=1,frame=0,hood=true,thermal=false,paused=false,stepOnce=false,speed=1,speedAcc=0;
 const rnd=Math.random;
-let noteFn=()=>{},onFound=()=>{},onBoom=()=>{};
+let noteFn=()=>{},onFound=()=>{},onBoom=()=>{},onGrown=()=>{};
 const note=(k,t)=>noteFn(k,t);
 function found(id){if(id>0&&!KNOWN[id]){KNOWN[id]=1;onFound(id)}}
 
@@ -26,13 +26,56 @@ function spawnGas(i,x,y,id){
   for(let k=0;k<6;k++){const j=rn(i,x,y);if(j>=0&&(type[j]===0||(k>2&&ELS[type[j]].beh===LIQUID))){made(j,id);T[j]=Math.max(T[i],20);return true}}
   return false;
 }
-function growPlant(i,x,y){
-  for(let k=0;k<5;k++){
-    const dx=(rnd()*3|0)-1,dy=rnd()<.65?-1:((rnd()*3|0)-1);
-    const nx=x+dx,ny=y+dy;if(nx<0||nx>=W||ny<0||ny>=H)continue;
-    const j=ny*W+nx;if(type[j]===0){made(j,PLANT);T[j]=20;return true}
+const DIRS8=[[0,-1],[1,-1],[-1,-1],[1,0],[-1,0],[0,1],[1,1],[-1,1]];
+const BLOOM=ID.bloom,WOODID=ID.wood;
+function bloomAt(i,x,y,sp){
+  const bc=SPB[sp];if(!bc)return;
+  for(let n=0;n<2;n++){
+    for(let k=0;k<5;k++){
+      const d=DIRS8[(rnd()*8)|0],nx=x+d[0],ny=y+(d[1]>0?-1:d[1]);if(nx<0||nx>=W||ny<0||ny>=H)continue;
+      const q=ny*W+nx;if(type[q]===0){setCell(q,BLOOM,sp);T[q]=20;break}
+    }
   }
-  return false;
+}
+function tryGrowFrom(i,x,y,sp){
+  const f=SPF[sp],b=life[i];
+  if(b===0){if(rnd()<.05)bloomAt(i,x,y,sp);return false}
+  let dx=0,dy=-1,t=PLANT;
+  switch(f){
+    case 'T':
+      if(b>BUD[sp]*.42){t=WOODID;dx=rnd()<.2?(rnd()<.5?-1:1):0;dy=-1}
+      else{const d=DIRS8[(rnd()*8)|0];dx=d[0];dy=d[1]}
+      break;
+    case 'F':case 'E':case 'K':dx=rnd()<(f==='K'?.12:.1)?(rnd()<.5?-1:1):0;dy=-1;break;
+    case 'G':{const r=rnd();dx=r<.4?-1:(r<.8?1:0);dy=rnd()<.5?-1:0;break}
+    case 'S':case 'P':{const d=DIRS8[(rnd()*8)|0];dx=d[0];dy=d[1]>0?0:d[1];break}
+    case 'V':{const r=rnd();dx=r<.4?-1:(r<.8?1:0);dy=rnd()<.55?0:(rnd()<.5?-1:1);break}
+  }
+  if(!dx&&!dy)return false;
+  const nx=x+dx,ny=y+dy;if(nx<0||nx>=W||ny<0||ny>=H)return false;
+  const k=ny*W+nx;if(type[k]!==0)return false;
+  setCell(k,t,sp);T[k]=20;life[k]=b-1;life[i]=b-1;
+  if(b-1<=((BUD[sp]*.35)|0)){if(sp&&!GROWN[sp]){GROWN[sp]=1;onGrown(sp)}if(rnd()<.5)bloomAt(k,nx,ny,sp)}
+  return true;
+}
+function growPlant(i,x,y,w){
+  if(w>=0){const tw=type[w];if(tw===ID.water){if(rnd()<.35)setCell(w,0)}else if(tw===ID.mud&&rnd()<.04)setCell(w,ID.dirt)}
+  const sp=aux[i];if(!sp&&type[i]!==PLANT)return;
+  /* water travels up the stem: walk through the same plant until a cell can grow */
+  let ci=i,cx=x,cy=y;
+  for(let h=0;h<60;h++){
+    if(tryGrowFrom(ci,cx,cy,sp))return;
+    /* step to a neighbouring cell of this plant, preferring up */
+    let moved=false;
+    for(let a=0;a<4&&!moved;a++){
+      const up=a===0||rnd()<.35;
+      const d=up?[(rnd()*3|0)-1,-1]:DIRS8[(rnd()*8)|0];
+      const nx=cx+d[0],ny=cy+d[1];if(nx<0||nx>=W||ny<0||ny>=H)continue;
+      const q=ny*W+nx,tq=type[q];
+      if((tq===PLANT||tq===WOODID)&&aux[q]===sp){ci=q;cx=nx;cy=ny;moved=true}
+    }
+    if(!moved)return;
+  }
 }
 
 /* explosions */
@@ -116,11 +159,14 @@ function react(i,x,y,t){
   if(rnd()>r.p)return;
   if(r.minT!==undefined&&T[i]<r.minT&&T[j]<r.minT)return;
   if(r.when&&!r.when(i,j))return;
+  const ai=aux[i],aj=aux[j];
   applyCode(i,r.a);applyCode(j,r.b);
+  if(type[i]===PLANT&&t===ID.seed){aux[i]=ai;life[i]=BUD[ai]||20;found(PLANT)}
+  else if(type[j]===PLANT&&tj===ID.seed){aux[j]=aj;life[j]=BUD[aj]||20;found(PLANT)}
   if(r.heat){T[i]+=r.heat;T[j]+=r.heat;if(r.heat>=300)kick(x,y,r.heat*.4,5)}
   if(r.flame>=0&&rnd()<.6)spawnFire(i,x,y,r.flame);
   if(r.emit>=0&&rnd()<.6)spawnGas(i,x,y,r.emit);
-  if(r.grow)growPlant(i,x,y);
+  if(r.grow)growPlant(i,x,y,j);
   if(r.boom&&rnd()<r.boom[0])boom(x,y,r.boom[1]);
   if(r.eq)note(r.id,r.eq.toUpperCase());
 }
@@ -304,6 +350,8 @@ function render(){
           const fe=ELS[aux[i]],fc=fe.flame||ELS[FIRE].flame,lf=Math.min(1,life[i]/26);
           const fl=.55+rnd()*.45;
           c=pack(Math.min(255,fc[0]*fl*(.6+lf*.5)+lf*40),Math.min(255,fc[1]*fl*(.5+lf*.6)+lf*40),Math.min(255,fc[2]*fl*(.5+lf*.5)+lf*30));
+        }else if(t===PLANT){c=LEAFPAL[aux[i]*8+vr[i]];
+        }else if(t===BLOOM){c=BLOOMPAL[aux[i]*8+vr[i]];
         }else if(t===SPARK){
           const f=.6+rnd()*.4;c=pack(160*f+60,255*f,255);
         }else if(t===MOLTEN){
@@ -336,11 +384,12 @@ function circle(cx,cy,r,fn){
   }
 }
 let brush=4;
-function paintEl(cx,cy,id){
+function paintEl(cx,cy,id,ax){
   const e=ELS[id],pr=e.beh===STATIC?1:e.beh===GAS||e.beh===FIREB||e.beh===SPARKB?.3:.55;
   circle(cx,cy,brush,k=>{
     if(type[k]!==0||rnd()>pr)return;
-    setCell(k,id);T[k]=e.initT!==undefined?e.initT:20;
+    setCell(k,id,ax||0);T[k]=e.initT!==undefined?e.initT:20;
+    if(id===ID.seed&&ax)life[k]=0;
     if(id===FIRE){life[k]=14+((rnd()*26)|0);T[k]=950}
     if(id===SPARK){life[k]=6;T[k]=1100}
   });

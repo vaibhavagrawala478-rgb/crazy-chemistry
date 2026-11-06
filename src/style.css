@@ -17,7 +17,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;letter
 h1,h2,h3,h4{font-weight:400}
 
 /* ---- app grid ---- */
-.app{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr) auto;background:
+.app{height:100%;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;background:
   linear-gradient(var(--bg),var(--bg))}
 .top{display:flex;align-items:center;gap:12px 20px;padding:10px 16px;border-bottom:4px solid var(--line);background:var(--panel);flex-wrap:wrap}
 .logo{font-size:24px;line-height:1;white-space:nowrap;display:flex;gap:0;margin-right:auto;text-shadow:4px 4px 0 var(--shadow)}
@@ -108,8 +108,13 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 @keyframes logIn{from{transform:translateX(-16px);opacity:0}}
 
 /* ---- dock ---- */
-.dock{background:var(--panel);border-top:4px solid var(--line);display:flex;flex-direction:column;height:212px}
-.tabs{display:flex;gap:0;overflow-x:auto;border-bottom:4px solid var(--line);flex:none;scrollbar-width:none}
+.dock{min-width:0;background:var(--panel);border-top:4px solid var(--line);display:flex;flex-direction:column;height:212px}
+.tabrow{display:flex;border-bottom:4px solid var(--line);flex:none;align-items:stretch}
+.tabs{display:flex;gap:0;overflow-x:auto;flex:1;min-width:0;scrollbar-width:none}
+.find{display:flex;align-items:center;gap:8px;padding:0 12px;border-left:4px solid var(--line);color:var(--dim);flex:none}
+.find input{width:200px;background:var(--bg);border:2px solid var(--line);color:var(--ink);font:inherit;padding:4px 8px 2px;outline:0;text-transform:uppercase}
+.find input:focus{border-color:var(--butter)}
+.find input::placeholder{color:#5f5174}
 .tabs::-webkit-scrollbar{display:none}
 .tab{display:flex;gap:8px;align-items:baseline;padding:10px 16px 6px;border-right:4px solid var(--line);color:var(--dim);position:relative;white-space:nowrap}
 .tab i{font-style:normal;font-size:16px;opacity:.7}
@@ -120,7 +125,8 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .el{background:var(--bg);color:var(--ink);border:4px solid var(--c);box-shadow:4px 4px 0 var(--shadow);text-align:left;padding:8px 8px 0;overflow:hidden;white-space:nowrap;
   background-image:linear-gradient(45deg,rgba(0,0,0,.2) 25%,transparent 25% 75%,rgba(0,0,0,.2) 75%),linear-gradient(45deg,rgba(0,0,0,.2) 25%,transparent 25% 75%,rgba(0,0,0,.2) 75%);
   background-size:8px 8px;background-position:0 0,4px 4px;background-color:var(--bg);text-shadow:2px 2px 0 rgba(0,0,0,.6)}
-.el b{font-weight:400}
+.el b{font-weight:400;display:block;overflow:hidden;text-overflow:ellipsis}
+.grid.wide{grid-template-columns:repeat(auto-fill,minmax(232px,1fr))}
 .el:hover{transform:translate(0,-4px);box-shadow:4px 8px 0 var(--shadow);background-color:var(--c);color:#15111c;text-shadow:none}
 .el:active{transform:translate(4px,4px);box-shadow:none}
 .el.lt{color:#15111c;text-shadow:none}
@@ -141,6 +147,9 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .tile small{color:var(--dim)}
 .tile em{font-style:normal;color:var(--mint);margin-top:auto}
 .tile em.hint{color:var(--dim);margin-top:auto}
+.tile.herb{min-height:92px}
+.tile.herb.grown{border-color:var(--c)}
+.tile.herb small{overflow-wrap:anywhere}
 .tile.ok{border-color:var(--c)}
 .tile.ok:hover{background:var(--panel2)}
 .tile:not(.ok){opacity:.7}.tile.peek{opacity:1;border-color:var(--butter)}

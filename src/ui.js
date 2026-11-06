@@ -12,10 +12,10 @@ const LS='crazychem.v2';
 let sandbox=false;
 try{
   const saved=JSON.parse(localStorage.getItem(LS)||'null');
-  if(saved){(saved.known||[]).forEach(k=>{if(ID[k]!==undefined)KNOWN[ID[k]]=1});sandbox=!!saved.sandbox}
+  if(saved){(saved.known||[]).forEach(k=>{if(ID[k]!==undefined)KNOWN[ID[k]]=1});sandbox=!!saved.sandbox;(saved.grown||[]).forEach(n=>{const q=SPN.indexOf(n);if(q>0)GROWN[q]=1})}
 }catch(e){}
 if(/unlock/.test(location.search))sandbox=true;
-function save(){try{localStorage.setItem(LS,JSON.stringify({known:ELS.filter(e=>KNOWN[e.id]&&!e.base).map(e=>e.key),sandbox}))}catch(e){}}
+function save(){try{localStorage.setItem(LS,JSON.stringify({known:ELS.filter(e=>KNOWN[e.id]&&!e.base).map(e=>e.key),sandbox,grown:SPN.filter((n,q)=>q>0&&GROWN[q])}))}catch(e){}}
 
 /* ---------- sound (starts after first click) ---------- */
 let AC=null,muted=false;
@@ -60,6 +60,12 @@ for(const e of ELS){
   items.push({cat:e.cat,kind:'el',el:e,tool:{kind:'el',id:e.id},nm:e.nm||e.name,name:e.name,sym:e.sym,col:e.col,desc:e.desc,tag:e.tag||[],state:BEHN[e.beh]});
 }
 
+for(let s=1;s<=NS;s++){
+  const lc=SPC[s];
+  items.push({cat:'flora',kind:'el',sp:s,el:ELS[ID.seed],tool:{kind:'el',id:ID.seed,aux:s},nm:SPN[s],name:SPN[s],sym:SPL[s],col:lc,
+    desc:SPL[s]+'. Drop the seed on soil or mud and water it.',tag:[FORMS[SPF[s]].name],state:'SEED'});
+}
+const spId=n=>SPN.indexOf(n);
 /* ---------- scenes ---------- */
 function setT(x0,y0,x1,y1,v){for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)T[y*W+x]=v}
 const SCENES=[
@@ -87,6 +93,11 @@ const SCENES=[
  {n:'Density tower',d:'Hg, water, oil, powders',f(){clearAll();const b=tube(190,232,44,170);
    fillRect(b.x0,b.y1-34,b.x1,b.y1,'mercury');fillRect(b.x0,b.y1-82,b.x1,b.y1-35,'water');fillRect(b.x0,b.y1-130,b.x1,b.y1-83,'oil');
    fillRect(b.x0+2,b.y1-160,b.x1-2,b.y1-152,'sulfur',.5);fillRect(b.x0+2,b.y1-152,b.x1-2,b.y1-146,'ash',.5);fillRect(b.x0+2,b.y1-146,b.x1-2,b.y1-140,'coal',.5);fillRect(b.x0+2,b.y1-140,b.x1-2,b.y1-134,'sand',.5)}},
+ {n:'Alkali race',d:'Li, Na, K, Rb, Cs in water',f(){clearAll();
+   ['lithium','sodium','potassium','rubidium','cesium'].forEach((m,i)=>{const cx=64+i*64;const b=beaker(cx,232,48,48);fillRect(b.x0,b.y1-26,b.x1,b.y1,'water');fillRect(cx-3,150-i*4,cx+2,155-i*4,m)})}},
+ {n:'Greenhouse',d:'Seeds on wet soil',f(){clearAll();fillRect(18,196,19,231,'bench');fillRect(364,196,365,231,'bench');fillRect(18,230,365,231,'bench');
+   ['Teddy Bear Sunflower','Daffodil','Dahlia','Pansy','Cactus','Paper Birch','Kale','Zinnia','Lantana','Jade Plant','Venus Fly Trap','Delphinium','Okra','Bacopa','Pampas Grass','Date Palm'].forEach((n,i)=>{const q=spId(n);if(q>0)setCell(205*W+(42+i*20),ID.seed,q)});
+   fillRect(20,206,363,229,'mud')}},
  {n:'Spark bottle',d:'H2 + O2 in a tube',f(){clearAll();const b=beaker(190,232,64,60);
    for(let x=b.x0-1;x<=b.x1+1;x++){glassPut(x,176);glassPut(x,177)}
    fillRect(b.x0,178,b.x1,b.y1,'hydrogen',1);for(let y=178;y<=b.y1;y++)for(let x=b.x0;x<=b.x1;x++)if(rnd()<.33)setCell(y*W+x,OXY);
@@ -104,7 +115,7 @@ function startBench(){
 /* ---------- dock ---------- */
 let cat='powder',tool=null,curItem=null,lastTool=null;
 const dockTabs=$('#tabs'),dockGrid=$('#grid');
-const visible=it=>it.kind!=='el'||sandbox||KNOWN[it.el.id];
+const visible=it=>it.kind!=='el'||it.sp||sandbox||KNOWN[it.el.id];
 function counts(){
   const k=PRODUCTS.filter(id=>KNOWN[id]).length;
   $('#cdxn').textContent=k+'/'+PRODUCTS.length;
@@ -115,11 +126,15 @@ function buildTabs(){
     if(!total&&k!==cat)return '';
     return `<button class="tab ${k===cat?'on':''}" data-k="${k}" style="--c:${c}"><span>${n}</span><i>${total}</i></button>`}).join('');
 }
+const findEl=$('#find');
 function buildGrid(){
-  dockGrid.innerHTML=items.map((it,i)=>({it,i})).filter(o=>o.it.cat===cat&&visible(o.it)).map(({it,i})=>{
+  const q=findEl.value.trim().toUpperCase();
+  dockGrid.classList.toggle('wide',cat==='flora'||!!q);
+  dockGrid.innerHTML=items.map((it,i)=>({it,i})).filter(o=>visible(o.it)&&(q?(U(o.it.nm).includes(q)||U(o.it.sym).includes(q)||U(o.it.name).includes(q)):o.it.cat===cat)).slice(0,400).map(({it,i})=>{
     const c=it.col,dark=lum(c)>150;
-    return `<button class="el ${it===curItem?'on':''} ${dark?'lt':''}" data-i="${i}" style="--c:${rgb(c)};--bg:${rgb(c.map(v=>Math.round(v*.52)))}"><b>${U(it.nm)}</b></button>`}).join('');
+    return `<button class="el ${it===curItem?'on':''} ${dark?'lt':''}" data-i="${i}" title="${U(it.name)}" style="--c:${rgb(c)};--bg:${rgb(c.map(v=>Math.round(v*.52)))}"><b>${U(it.nm)}</b></button>`}).join('');
 }
+findEl.addEventListener('input',buildGrid);
 dockTabs.addEventListener('click',e=>{const b=e.target.closest('.tab');if(!b)return;sfxClick();cat=b.dataset.k;buildTabs();buildGrid()});
 dockGrid.addEventListener('click',e=>{const b=e.target.closest('.el');if(!b)return;sfxClick();select(items[+b.dataset.i])});
 
@@ -131,6 +146,16 @@ function select(it){
   buildGrid();inspect(it);
 }
 function inspect(it){
+  if(it.sp){
+    const s=it.sp,f=FORMS[SPF[s]];
+    $('#insp').style.setProperty('--c',rgb(it.col));
+    $('#insp').innerHTML=`<div class="ihead"><div class="sw"></div><div><h3>${U(it.name)}</h3><span class="sym">${U(it.sym)}</span></div></div>
+     <div class="tags"><span class="pill">${f.name}</span>${GROWN[s]?'<span class="pill" style="color:var(--mint);border-color:var(--mint)">GROWN</span>':''}</div>
+     <p>${U(it.desc)}</p>
+     <dl><div><dt>HABIT</dt><dd>${f.name.split(' ')[0]}</dd></div><div><dt>SIZE</dt><dd>${SPF[s]==='T'?'LARGE':(f.bud>40?'MEDIUM':'SMALL')}</dd></div>
+     <div><dt>LEAF</dt><dd>${U(['','','','','','','','','',''][0]||'GREEN')}</dd></div><div><dt>BLOOM</dt><dd>${SPB[s]?'YES':'NONE'}</dd></div></dl>`;
+    return;
+  }
   const e=it.el,rows=[];
   if(e){
     rows.push(['STATE',BEHN[e.beh]]);
@@ -176,20 +201,32 @@ onFound=id=>{
   setTimeout(()=>d.classList.add('out'),3800);setTimeout(()=>d.remove(),4300);
   noteFn('found'+id,'DISCOVERED '+U(e.name));
 };
+onGrown=s=>{
+  save();
+  const d=document.createElement('div');d.className='toast';d.style.setProperty('--c',rgb(SPC[s]));
+  d.innerHTML=`<div class="tsw"></div><div><small>FULLY GROWN</small><b>${U(SPN[s])}</b><em>${U(SPL[s])}</em></div>`;
+  toasts.prepend(d);while(toasts.children.length>3)toasts.lastElementChild.remove();
+  setTimeout(()=>d.classList.add('out'),3000);setTimeout(()=>d.remove(),3500);
+  noteFn('grown'+s,'GREW '+U(SPN[s]));if(codexOpen)buildCodex();
+};
 let codexOpen=false;
 const codex=$('#codex');
 function buildCodex(){
   const groups={};
   PRODUCTS.forEach(id=>{const c=ELS[id].cat;(groups[c]=groups[c]||[]).push(id)});
-  $('#cxhead').textContent=PRODUCTS.filter(id=>KNOWN[id]).length+' / '+PRODUCTS.length+' DISCOVERED';
+  $('#cxhead').textContent=PRODUCTS.filter(id=>KNOWN[id]).length+' / '+PRODUCTS.length+' DISCOVERED  '+GROWN.reduce((a,b)=>a+b,0)+' / '+NS+' PLANTS GROWN';
+  let herb='<h4 style="--c:#7be07a">HERBARIUM</h4><div class="tiles">';
+  for(let s=1;s<=NS;s++)herb+=`<button class="tile herb ${GROWN[s]?'grown ok':''}" data-sp="${s}" style="--c:${rgb(SPC[s])}"><b>${U(SPN[s])}</b><small>${U(SPL[s])}</small><em>${GROWN[s]?'GROWN':'NOT YET GROWN'}</em></button>`;
+  herb+='</div>';
   $('#cxtiles').innerHTML=CATS.filter(c=>groups[c[0]]).map(([k,n,col])=>`<h4 style="--c:${col}">${n}</h4><div class="tiles">`+groups[k].map(id=>{
     const e=ELS[id],ok=KNOWN[id];
     const rec=[...new Set(RECIPES[id]||[])].slice(0,2).map(U).join(' / ')||'EXPERIMENT';
     return ok?`<button class="tile ok" data-id="${id}" style="--c:${rgb(e.col)}"><span class="tsw"></span><b>${U(e.nm||e.name)}</b><small>${U(e.sym)}</small><em>${rec}</em></button>`
-             :`<button class="tile" data-id="${id}"><span class="tsw q">?</span><b>???</b><small>LOCKED</small><em class="hint">TAP FOR HINT</em></button>`}).join('')+'</div>').join('');
+             :`<button class="tile" data-id="${id}"><span class="tsw q">?</span><b>???</b><small>LOCKED</small><em class="hint">TAP FOR HINT</em></button>`}).join('')+'</div>').join('')+herb;
 }
 $('#cxtiles').addEventListener('click',e=>{
-  const t=e.target.closest('.tile');if(!t)return;const id=+t.dataset.id,el=ELS[id];
+  const t=e.target.closest('.tile');if(!t)return;
+  if(t.dataset.sp){const it=items.find(i=>i.sp===+t.dataset.sp);codexToggle(false);cat='flora';buildTabs();select(it);return}const id=+t.dataset.id,el=ELS[id];
   if(KNOWN[id]){codexToggle(false);select(items.find(i=>i.el===el))}
   else{const rec=[...new Set(RECIPES[id]||[])][0]||'TRY HEAT, ACID, OR ELECTRICITY';t.querySelector('em').textContent=U(rec);t.classList.add('peek')}
 });
@@ -334,7 +371,7 @@ cvEl.addEventListener('pointerleave',()=>{ptr.inside=false;updateRing()});
 cvEl.addEventListener('pointerenter',()=>{ptr.inside=true;updateRing()});
 cvEl.addEventListener('contextmenu',e=>e.preventDefault());
 function applyTool(){
-  if(tool.kind==='el')line(ptr.px,ptr.py,ptr.x,ptr.y,(x,y)=>paintEl(x,y,tool.id));
+  if(tool.kind==='el')line(ptr.px,ptr.py,ptr.x,ptr.y,(x,y)=>paintEl(x,y,tool.id,tool.aux));
   else if(tool.kind==='heat'||tool.kind==='cool'||tool.kind==='erase')line(ptr.px,ptr.py,ptr.x,ptr.y,(x,y)=>paintTool(x,y,tool.kind));
   else if(tool.kind==='pour')pourStep(ptr.x,ptr.y);
   ptr.px=ptr.x;ptr.py=ptr.y;
@@ -366,12 +403,13 @@ function loop(ts){
   buildTabs();
   select(items.find(i=>i.el&&i.el.key==='water'));
   cat='liquid';buildTabs();buildGrid();
+  {const mc=/cat=(\w+)/.exec(location.hash);if(mc){cat=mc[1];buildTabs();buildGrid()}}
   counts();renderRack();fit();startBench();
   if(/codex/.test(location.hash))codexToggle(true);
   const m=/scene=(\d+)(?:&steps=(\d+))?/.exec(location.hash);
   if(m&&SCENES[+m[1]]){SCENES[+m[1]].f();for(let i=0;i<(+m[2]||0);i++)step()}
   const intro=$('#intro');
   if(/nointro/.test(location.search))intro.remove();else setTimeout(()=>intro.remove(),2900);
-  window.__lab={step,render,SCENES,ID,ELS,type,T,aux,boom,startBench,clearAll,fillRect,setPause,KNOWN,found,RECIPES,PRODUCTS,get frame(){return frame}};
+  window.__lab={step,render,SCENES,GROWN,SPN,ID,ELS,type,T,aux,boom,startBench,clearAll,fillRect,setPause,KNOWN,found,RECIPES,PRODUCTS,get frame(){return frame}};
   requestAnimationFrame(loop);
 })();

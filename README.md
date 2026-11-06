@@ -3,10 +3,12 @@
 A pixel chemistry lab in the browser. Mix, melt, shock and bottle 100+ elements, and unlock new compounds by mixing them.
 
 - Falling-sand simulation with heat, phase changes, fire, explosions and electricity
-- 114 elements, 17 metals, about 130 reactions
-- A Codex of 36 discoverable compounds: alloys, precipitates, acids, explosives, plants
+- 135 elements including 30 metals (alkali, alkaline earth, transition, post-transition) and 8 alloys, and about 190 reactions
+- 188 plant species (Abelia to ZZ Plant) with their own look and growth habit: trees, shrubs, flowers, grasses, cacti, vines, crops
+- Household and industrial chemicals: salt, baking soda, vinegar, bleach, lye, acids, ethanol, peroxide, chalk, Epsom salt, ammonia, acetone, methanol, toluene and more
+- A Codex of 38 discoverable compounds and a Herbarium that tracks which plants you have grown
 - Vial rack for storing and pouring chemicals
-- 12 ready-made experiments
+- 14 ready-made experiments, including an alkali metal race and a greenhouse
 
 ## Run
 
@@ -14,7 +16,7 @@ Open `index.html` in a browser. No install needed.
 
 ## Build
 
-`index.html` is generated from `src/` (data, engine, UI, styles). After editing:
+`index.html` is generated from `src/` (elements, plants, engine, UI, styles). After editing:
 
 ```
 python build.py

@@ -8,7 +8,7 @@ const AIR=0.00122;
 const ELS=[],ID={};
 const CATS=[
   ['lab','LAB','#ffd45e'],['powder','POWDERS','#f2b968'],['liquid','LIQUIDS','#5cc8ff'],['gas','GASES','#8be8c4'],
-  ['metal','METALS','#c9d3e0'],['alloy','ALLOYS','#e8b86a'],['mineral','MINERALS','#c2a8c8'],['life','LIFE','#6ee7a0'],
+  ['metal','METALS','#c9d3e0'],['alloy','ALLOYS','#e8b86a'],['mineral','MINERALS','#c2a8c8'],['life','LIFE','#6ee7a0'],['flora','FLORA','#7be07a'],
   ['boom','BOOM','#ff6a5c'],['demo','DEMOS','#b896ff']
 ];
 const BEHN=['EMPTY','SOLID','POWDER','LIQUID','GAS','ENERGY','ENERGY'];
@@ -54,7 +54,7 @@ def('coal','Coal','Coal','C','powder',POWDER,1.2,[40,40,48],{base:1,cond:.2,flam
 def('charcoal','Charcoal','Charcoal','C','powder',POWDER,.7,[28,28,34],{cond:.15,flame:[255,130,40],flameT:1000,
   burn:{T:350,p:.03,to:'ash',heat:380,flame:1,eq:'C + O2 -> CO2'},tag:['FLAMMABLE'],desc:'Burnt wood or dehydrated sugar. Burns clean and hot.'});
 def('chalk','Chalk','Chalk','CaCO3','powder',POWDER,1.5,[236,233,222],{base:1,cond:.15,hot:{t:900,to:'quicklime',alt:{p:.4,to:'co2'},eq:'CaCO3 -> CaO + CO2'},desc:'Limestone. Fizzes in acid. Roast it to get quicklime.'});
-def('quicklime','Quicklime','Quicklime','CaO','powder',POWDER,1.6,[248,246,238],{cond:.15,tag:['CAUSTIC'],desc:'Hungry for water. Slakes into limewater with a burst of heat.'});
+def('quicklime','Quicklime','Quicklime','CaO','powder',POWDER,1.6,[248,246,238],{base:1,cond:.15,tag:['CAUSTIC'],desc:'Hungry for water. Slakes into limewater with a burst of heat.'});
 def('gunpowder','Gunpowder','Gunpowder','KNO3','powder',POWDER,1.05,[78,76,90],{base:1,cond:.1,flame:[255,170,60],flameT:1300,
   burn:{T:280,p:.5,to:'smoke',heat:1000,flame:1,boom:[.3,4],eq:'Black powder deflagration'},tag:['EXPLOSIVE'],desc:'Black powder. Needs just a flame, then blows holes.'});
 def('thermite','Thermite','Thermite','Al+FeO','powder',POWDER,2.5,[170,80,64],{base:1,cond:.15,flame:[255,245,220],flameT:2300,
@@ -70,8 +70,8 @@ def('yeast','Yeast','Yeast','fungi','powder',POWDER,1.1,[206,170,110],{base:1,co
 def('dirt','Dirt','Dirt','soil','powder',POWDER,1.3,[110,76,50],{base:1,cond:.15,desc:'Plain soil. Turns to mud when wet.'});
 def('clay','Clay','Clay','Al2Si2','powder',POWDER,1.7,[188,118,92],{base:1,cond:.2,hot:{t:900,to:'brick'},desc:'Fire it at 900 C and it becomes brick.'});
 def('cement','Cement','Cement','CaSiO','powder',POWDER,1.5,[160,160,160],{base:1,cond:.15,desc:'Add water and it sets into concrete.'});
-def('strontium','Sr salt','Strontium salt','Sr','powder',POWDER,1.8,[238,190,196],{base:1,cond:.15,flame:[255,36,70],flameT:1000,
-  burn:{T:400,p:.025,to:'ash',heat:200,flame:1,eq:'Strontium: crimson flame'},tag:['RED FLAME'],desc:'Burns deep crimson. The firework red.'});
+def('strontium','Strontium','Strontium','Sr','metal',POWDER,2.64,[200,196,170],{base:1,cond:.5,cap:1.7,conduct:1,flame:[255,36,70],flameT:1000,
+  burn:{T:400,p:.025,to:'ash',heat:200,flame:1,dry:1,eq:'Strontium: crimson flame'},tag:['RED FLAME'],desc:'Alkaline earth metal. Burns deep crimson, the firework red.'});
 def('coppersulfate','CuSO4','Copper sulfate','CuSO4','powder',POWDER,2.3,[56,130,230],{base:1,cond:.2,flame:[60,240,150],flameT:1000,
   burn:{T:500,p:.025,to:'ash',heat:100,flame:1,eq:'Copper: green-blue flame'},tag:['GREEN FLAME'],desc:'Blue crystals. Dissolves into blue copper solution and burns green.'});
 def('ash','Ash','Ash','ash','powder',POWDER,.5,[118,114,112],{base:1,cond:.1,ext:.2,desc:'What is left after burning. Floats on water.'});
@@ -85,7 +85,7 @@ def('ammoniumnitrate','NH4NO3','Ammonium nitrate','NH4NO3','powder',POWDER,1.7,[
 dust('copperdust','Cu dust','Copper dust','Cu',8,[210,110,70],'copper',1085,{desc:'Copper that crashed out of solution. Melts back into a bead.'});
 dust('silverdust','Ag dust','Silver dust','Ag',8,[240,242,248],'silver',962,{desc:'Silver precipitate. It grows in crystals on copper.'});
 dust('golddust','Au dust','Gold dust','Au',9,[255,208,60],'gold',1064,{desc:'Gold powder from aqua regia. Mercury sticks to it.'});
-def('tnt','TNT','TNT','C7H5N3','powder',POWDER,1.6,[196,60,48],{base:1,cond:.1,flame:[255,170,60],flameT:1500,
+def('tnt','TNT','TNT','C7H5N3','powder',POWDER,1.6,[196,60,48],{cond:.1,flame:[255,170,60],flameT:1500,
   burn:{T:240,p:.35,to:'smoke',heat:1400,flame:1,boom:[.35,6],eq:'TNT detonation'},tag:['EXPLOSIVE'],desc:'Stable until heated or lit. Chain-reacts across a pile.'});
 
 /* alkali metals sit in the powder family so they can be dropped */
@@ -113,7 +113,7 @@ def('aquaregia','Aq regia','Aqua regia','HCl+HNO3','liquid',LIQUID,1.3,[255,176,
 def('base','NaOH','Sodium hydroxide','NaOH','liquid',LIQUID,1.25,[200,100,226],{base:1,alpha:.88,cond:.5,cap:2.8,ext:.15,hot:{t:140,to:'steam',p:.4,latent:20},tag:['CAUSTIC'],
   desc:'Caustic soda. Cancels acid, dissolves aluminium and zinc.'});
 def('limewater','Limewater','Limewater','Ca(OH)2','liquid',LIQUID,1.05,[214,236,230],{alpha:.7,cond:.6,cap:3,ext:.4,hot:{t:100,to:'steam',p:.4,latent:25},desc:'Goes milky when CO2 bubbles through.'});
-def('bleach','Bleach','Bleach','NaOCl','liquid',LIQUID,1.1,[218,232,150],{alpha:.7,cond:.5,cap:3,ext:.3,tag:['TOXIC'],desc:'Never mix it with acid. It gives off chlorine.'});
+def('bleach','Bleach','Bleach','NaOCl','liquid',LIQUID,1.1,[218,232,150],{base:1,alpha:.7,cond:.5,cap:3,ext:.3,tag:['TOXIC'],desc:'Never mix it with acid. It gives off chlorine.'});
 def('oil','Oil','Oil','C12H26','liquid',LIQUID,.8,[165,110,36],{base:1,alpha:.92,cond:.15,cap:2,flow:.8,spread:4,flame:[255,140,40],flameT:1000,
   hot:{t:320,to:'smoke',p:.2},burn:{T:250,p:.07,to:'void',heat:450,flame:1,smoke:.5,eq:'Oil + O2 -> CO2 + H2O + soot'},tag:['FLAMMABLE'],desc:'Floats on water. Burns smoky. Stores sodium safely.'});
 def('fuel','Fuel','Gasoline','C8H18','liquid',LIQUID,.74,[236,200,120],{base:1,alpha:.65,cond:.12,cap:2,flame:[255,150,50],flameT:1200,
@@ -149,7 +149,7 @@ def('co2','CO2','Carbon dioxide','CO2','gas',GAS,.0018,[165,165,180],{base:1,alp
 def('smoke','Smoke','Smoke','soot','gas',GAS,.0008,[92,92,98],{base:1,alpha:.5,lifeBase:90,desc:'Soot drifting up.'});
 def('so2','SO2','Sulfur dioxide','SO2','gas',GAS,.0026,[220,208,140],{alpha:.4,tag:['TOXIC'],desc:'Choking gas. Peroxide turns it into sulfuric acid.'});
 def('h2s','H2S','Hydrogen sulfide','H2S','gas',GAS,.0014,[210,200,90],{alpha:.35,flame:[90,120,255],flameT:900,burn:{T:260,p:.4,to:'so2',heat:400,flame:1,eq:'2H2S + 3O2 -> 2SO2 + 2H2O'},tag:['TOXIC'],desc:'Rotten egg gas. Meets SO2 and makes sulfur.'});
-def('nh3','Ammonia','Ammonia','NH3','gas',GAS,.0007,[196,224,236],{alpha:.3,tag:['TOXIC'],desc:'Sharp gas. Makes salmiac with acid and nitrate with nitric acid.'});
+def('nh3','Ammonia','Ammonia','NH3','gas',GAS,.0007,[196,224,236],{base:1,alpha:.3,tag:['TOXIC'],desc:'Sharp gas. Makes salmiac with acid and nitrate with nitric acid.'});
 def('no2','NO2','Nitrogen dioxide','NO2','gas',GAS,.0021,[214,110,40],{alpha:.5,tag:['TOXIC'],desc:'Brown fumes. In water they make nitric acid.'});
 def('acetylene','C2H2','Acetylene','C2H2','gas',GAS,.0011,[236,226,170],{alpha:.3,flame:[255,236,180],flameT:2800,
   burn:{T:305,p:.5,to:'co2',heat:1400,flame:1,smoke:.5,boom:[.05,4],eq:'2C2H2 + 5O2 -> 4CO2 + 2H2O'},tag:['FLAMMABLE'],desc:'Welding gas. Burns at 3000 C.'});
@@ -180,6 +180,44 @@ metal('bronze','Bronze','Bronze','Cu+Sn',8.8,[170,122,62],950,{cat:'alloy',desc:
 metal('solder','Solder','Solder','Sn+Pb',8.4,[186,190,196],183,{cat:'alloy',desc:'Molten tin plus lead. Melts at 183 C.'});
 metal('electrum','Electrum','Electrum','Au+Ag',14,[230,208,124],1000,{cat:'alloy',desc:'Molten gold plus silver.'});
 def('amalgam','Amalgam','Gold amalgam','Hg+Au','alloy',POWDER,12,[206,208,216],{cond:.5,hot:{t:357,to:'hgvapor',p:.3,alt:{p:.5,to:'golddust'}},tag:['TOXIC'],desc:'Mercury soaked up gold. Heat it and the mercury boils away.'});
+
+/* ---------------- more lab chemicals ---------------- */
+def('epsom','Epsom','Epsom salt','MgSO4','powder',POWDER,1.68,[244,244,250],{base:1,cond:.15,desc:'Bath salt. Dissolves in water, and sodium hydroxide turns it into milk of magnesia.'});
+def('mgoh2','Mg milk','Milk of magnesia','Mg(OH)2','powder',POWDER,1.5,[250,248,252],{cond:.15,desc:'White precipitate. A gentle antacid.'});
+def('fepo4','FePO4','Iron phosphate','FePO4','powder',POWDER,2.4,[120,124,132],{cond:.15,desc:'The grey coat left when phosphoric acid treats rust.'});
+def('phosacid','H3PO4','Phosphoric acid','H3PO4','liquid',LIQUID,1.69,[236,236,196],{base:1,alpha:.8,cond:.5,cap:2.8,ext:.15,hot:{t:158,to:'steam',p:.3,latent:20},tag:['CORROSIVE'],desc:'Rust remover and cola ingredient. Turns rust into iron phosphate.'});
+def('acetone','Acetone','Acetone','C3H6O','liquid',LIQUID,.79,[196,220,244],{base:1,alpha:.6,cond:.2,cap:2.2,flame:[255,170,90],flameT:1000,
+  hot:{t:56,to:'solvvapor',p:.4},burn:{T:200,p:.15,to:'void',heat:350,flame:1,smoke:.2,eq:'C3H6O + 4O2 -> 3CO2 + 3H2O'},tag:['FLAMMABLE'],desc:'Nail polish remover. Evaporates almost at once and burns easily.'});
+def('methanol','Methanol','Methanol','CH3OH','liquid',LIQUID,.79,[206,222,238],{base:1,alpha:.6,cond:.2,cap:2.4,flame:[150,170,255],flameT:950,
+  hot:{t:65,to:'solvvapor',p:.35},burn:{T:200,p:.1,to:'void',heat:320,flame:1,eq:'2CH3OH + 3O2 -> 2CO2 + 4H2O (almost invisible flame)'},tag:['FLAMMABLE','TOXIC'],desc:'Wood alcohol. Burns with a pale flame. Toxic.'});
+def('toluene','Toluene','Toluene','C7H8','liquid',LIQUID,.87,[214,196,150],{base:1,alpha:.7,cond:.15,cap:2.2,flame:[255,140,50],flameT:1100,
+  hot:{t:110,to:'solvvapor',p:.3},burn:{T:220,p:.1,to:'void',heat:400,flame:1,smoke:.6,eq:'C7H8 + 9O2 -> 7CO2 + 4H2O (sooty)'},tag:['FLAMMABLE'],desc:'Paint solvent. Nitric acid turns it into TNT.'});
+def('solvvapor','Solvent g','Solvent vapour','vapour','gas',GAS,.0034,[200,214,236],{alpha:.3,lifeBase:140,flame:[130,160,255],flameT:900,
+  burn:{T:300,p:.5,to:'co2',heat:400,flame:1,boom:[.03,2],eq:'Solvent vapour flash fire'},hide:1});
+
+/* ---------------- more metals ---------------- */
+def('rubidium','Rubidium','Rubidium','Rb','metal',POWDER,1.53,[176,178,192],{base:1,cond:.5,cap:1.7,conduct:1,flame:[214,64,130],flameT:1100,
+  burn:{T:40,p:.08,to:'ash',heat:450,flame:1,dry:1,eq:'4Rb + O2 -> 2Rb2O (red-violet flame)'},tag:['VIOLENT'],desc:'Heavier cousin of potassium. Lights in air above 40 C.'});
+def('cesium','Cesium','Cesium','Cs','metal',POWDER,1.93,[226,206,130],{base:1,cond:.4,cap:1.7,conduct:1,flame:[130,150,255],flameT:1200,
+  burn:{T:28,p:.1,to:'ash',heat:500,flame:1,dry:1,eq:'4Cs + O2 -> 2Cs2O (blue flame)'},tag:['VIOLENT'],desc:'Golden and almost liquid. Detonates in water.'});
+def('francium','Francium','Francium','Fr','metal',POWDER,2.5,[206,196,216],{base:1,cond:.4,cap:1.7,conduct:1,flame:[200,120,255],flameT:1200,
+  burn:{T:20,p:.12,to:'ash',heat:600,flame:1,dry:1,eq:'Francium oxidises on sight'},tag:['VIOLENT','RADIOACTIVE'],desc:'The rarest metal. Reacts with everything, instantly.'});
+def('barium','Barium','Barium','Ba','metal',POWDER,3.6,[188,196,170],{base:1,cond:.5,cap:1.7,conduct:1,flame:[120,255,100],flameT:1000,
+  burn:{T:350,p:.025,to:'ash',heat:240,flame:1,dry:1,eq:'2Ba + O2 -> 2BaO (green flame)'},tag:['GREEN FLAME','TOXIC'],desc:'Burns apple green. Fizzes in water.'});
+metal('beryllium','Beryllium','Beryllium','Be',1.85,[190,198,198],1287,{base:1,tag:['TOXIC'],desc:'Light, stiff and toxic dust. Melts at 1287 C.'});
+def('radium','Radium','Radium','Ra','metal',STATIC,5,[200,236,206],{base:1,cond:.5,cap:1.7,conduct:1,emit:260,tag:['RADIOACTIVE'],desc:'Glows and fires a spark into neighbouring metal now and then.'});
+metal('cobalt','Cobalt','Cobalt','Co',8.9,[112,132,172],1495,{base:1,desc:'Blue-grey and magnetic. Dissolves slowly in acid.'});
+metal('manganese','Manganese','Manganese','Mn',7.4,[162,152,172],1246,{base:1,desc:'Brittle and brisk in acid. Makes steel tough.'});
+metal('chromium','Chromium','Chromium','Cr',7.2,[192,202,212],1907,{base:1,desc:'Mirror bright. Melt it into steel to make stainless.'});
+metal('gallium','Gallium','Gallium','Ga',5.9,[198,208,218],30,{base:1,desc:'Melts at 30 C, so a warm hand turns it liquid.'});
+metal('indium','Indium','Indium','In',7.3,[182,186,202],157,{base:1,desc:'Soft, low melting.'});
+metal('bismuth','Bismuth','Bismuth','Bi',9.8,[206,172,190],271,{base:1,desc:'Pink-tinged and low melting. Mixed with tin it makes pewter.'});
+metal('stainless','Stainless','Stainless steel','Fe+Cr',7.9,[184,192,202],1400,{cat:'alloy',desc:'Molten steel plus chromium. Does not rust.'});
+metal('pewter','Pewter','Pewter','Sn+Bi',7.3,[170,174,172],230,{cat:'alloy',desc:'Soft tin alloy. Molten tin plus bismuth.'});
+
+/* ---------------- plant parts (species data lives in plants.js) ---------------- */
+def('bloom','Bloom','Bloom','flower','life',STATIC,.4,[255,150,190],{hide:1,cond:.2,cap:2,flame:[255,150,50],flameT:900,
+  burn:{T:240,p:.06,to:'ash',heat:150,flame:1,smoke:.2}});
 
 /* ---------------- minerals / structures ---------------- */
 def('glass','Glass','Glass','SiO2','mineral',STATIC,2.5,[150,205,215],{base:1,alpha:.5,cond:.3,cap:1.8,hot:{t:1450,to:'molten'},desc:'Beakers and flasks. Takes 1400 C. Shatters in blasts.'});
@@ -241,14 +279,21 @@ each(WATERS,w=>{
   rx('potassium',w,{a:'hydrogen',b:'base',p:.5,heat:380,flame:'potassium',boom:[.05,4],eq:'2K + 2H2O -> 2KOH + H2 (explosive)'});
   rx('calcium',w,{a:'hydrogen',b:'limewater',p:.1,heat:70,eq:'Ca + 2H2O -> Ca(OH)2 + H2'});
 });
+each(WATERS,w=>{
+  rx('rubidium',w,{a:'hydrogen',b:'base',p:.55,heat:420,flame:'rubidium',boom:[.07,5],eq:'2Rb + 2H2O -> 2RbOH + H2 (explosive)'});
+  rx('cesium',w,{a:'hydrogen',b:'base',p:.6,heat:480,flame:'cesium',boom:[.15,6],eq:'2Cs + 2H2O -> 2CsOH + H2 (detonates)'});
+  rx('francium',w,{a:'hydrogen',b:'base',p:.7,heat:600,flame:'francium',boom:[.25,7],eq:'2Fr + 2H2O -> 2FrOH + H2 (catastrophic)'});
+  rx('barium',w,{a:'hydrogen',b:'limewater',p:.12,heat:80,eq:'Ba + 2H2O -> Ba(OH)2 + H2'});
+  rx('strontium',w,{a:'hydrogen',b:'base',p:.1,heat:70,eq:'Sr + 2H2O -> Sr(OH)2 + H2'});
+});
 rx('sodium','steam',{a:'hydrogen',b:'base',p:.3,heat:220,flame:'sodium'});
-each(['sodium','potassium','lithium','calcium'],m=>{
+each(['sodium','potassium','lithium','calcium','rubidium','cesium','francium','barium','strontium'],m=>{
   rx(m,'acid',{a:'hydrogen',b:'salt',p:.5,heat:350,flame:m,boom:m==='potassium'?[.06,4]:[.03,3],eq:m+' + HCl -> salt + H2'});
   rx(m,'vinegar',{a:'hydrogen',b:'salt',p:.3,heat:120,eq:m+' + vinegar -> salt + H2'});
   rx(m,'chlorine',{a:'salt',b:'void',p:.4,heat:600,flame:m,eq:'2M + Cl2 -> 2MCl (brilliant flash)'});
 });
 /* metals + hydrochloric acid */
-each([['iron',.05],['zinc',.12],['magnesium',.3],['aluminum',.07],['tin',.03],['nickel',.02],['lead',.012]],([m,p])=>
+each([['iron',.05],['zinc',.12],['magnesium',.3],['aluminum',.07],['tin',.03],['nickel',.02],['lead',.012],['cobalt',.02],['manganese',.06],['chromium',.03],['gallium',.03],['indium',.02],['beryllium',.02]],([m,p])=>
   rx('acid',m,{a:'hydrogen',b:'void',p,heat:m==='magnesium'?60:20,eq:m+' + 2HCl -> chloride + H2'}));
 each([['magnesium',.05],['zinc',.02]],([m,p])=>rx('vinegar',m,{a:'hydrogen',b:'void',p,heat:5,eq:m+' + vinegar -> acetate + H2'}));
 rx('base','aluminum',{a:'hydrogen',b:'void',p:.04,heat:40,eq:'2Al + 2NaOH + 6H2O -> 2Na[Al(OH)4] + 3H2'});
@@ -343,11 +388,22 @@ rx('spark','saltwater',{b:'hydrogen',emit:'chlorine',p:.3,eq:'2NaCl + 2H2O -> H2
 each(WATERS,w=>rx('molten',w,{b:'steam',p:.4,heat:-120,boom:[.01,3],eq:'Hot melt + water -> flash steam (quench)'}));
 rx('molten','coal',{a:'molten:steel',b:'void',p:.1,when:(i,j)=>aux[i]===ID.iron,eq:'Molten iron + carbon -> steel'});
 rx('molten','charcoal',{a:'molten:steel',b:'void',p:.1,when:(i,j)=>aux[i]===ID.iron,eq:'Molten iron + carbon -> steel'});
+/* household and industrial chemicals */
+each(WATERS,w=>rx('epsom',w,{a:'saltwater',b:'saltwater',p:.1,eq:'MgSO4 dissolves'}));
+rx('epsom','base',{a:'mgoh2',b:'saltwater',p:.15,eq:'MgSO4 + 2NaOH -> Mg(OH)2 + Na2SO4 (milk of magnesia)'});
+rx('phosacid','rust',{a:'saltwater',b:'fepo4',p:.12,heat:10,eq:'Rust + H3PO4 -> iron phosphate (rust converter)'});
+rx('phosacid','base',{a:'saltwater',b:'saltwater',p:.6,heat:120,eq:'H3PO4 + 3NaOH -> Na3PO4 + 3H2O'});
+rx('phosacid','chalk',{a:'co2',b:'saltwater',p:.2,heat:10,eq:'3CaCO3 + 2H3PO4 -> Ca3(PO4)2 + 3H2O + 3CO2'});
+rx('phosacid','zinc',{a:'hydrogen',b:'void',p:.03,heat:10});
+rx('phosacid','magnesium',{a:'hydrogen',b:'void',p:.1,heat:20});
+rx('toluene','nitricacid',{a:'tnt',b:'void',p:.04,heat:80,eq:'C7H8 + 3HNO3 -> C7H5N3O6 + 3H2O (nitration, TNT)'});
 /* life */
 rx('seed','water',{a:'plant',b:'void',p:.04,eq:'Seed + water -> shoot'});
 rx('seed','mud',{a:'plant',b:'dirt',p:.07,eq:'Seed + mud -> shoot'});
-rx('plant','water',{b:'void',p:.06,grow:1,eq:'Plant drinks and grows'});
-rx('plant','mud',{b:'dirt',p:.06,grow:1});
+rx('plant','water',{p:.45,grow:1,eq:'Plant drinks and grows'});
+rx('plant','mud',{p:.45,grow:1});
+rx('wood','water',{p:.45,grow:1});
+rx('wood','mud',{p:.45,grow:1});
 rx('plant','co2',{b:'oxygen',p:.03,eq:'6CO2 + 6H2O -> C6H12O6 + 6O2 (photosynthesis)'});
 rx('dirt','water',{a:'mud',b:'mud',p:.05});
 rx('clay','water',{a:'mud',b:'mud',p:.04});
@@ -356,7 +412,7 @@ rx('cement','water',{a:'wetconcrete',b:'wetconcrete',p:.1,heat:30,eq:'Cement + w
 /* alloys: molten metal meets molten metal */
 const ALLOY=new Array(NE*NE);
 function alloy(a,b,r){ALLOY[ID[a]*NE+ID[b]]=ID[r];ALLOY[ID[b]*NE+ID[a]]=ID[r];recipe(ID[r],'Molten '+ELS[ID[a]].nm+' + '+ELS[ID[b]].nm)}
-alloy('copper','zinc','brass');alloy('copper','tin','bronze');alloy('tin','lead','solder');alloy('gold','silver','electrum');
+alloy('copper','zinc','brass');alloy('copper','tin','bronze');alloy('tin','lead','solder');alloy('gold','silver','electrum');alloy('steel','chromium','stainless');alloy('tin','bismuth','pewter');
 recipe(ID.steel,'Molten Iron + Coal');
 
 /* phase / burn recipes */
