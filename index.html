@@ -123,15 +123,18 @@ body.chaos .frame{animation:chaosframe .6s steps(1) infinite}
 @keyframes logIn{from{transform:translateX(-16px);opacity:0}}
 
 /* ---- dock ---- */
-.dock{min-width:0;background:var(--panel);border-top:4px solid var(--line);display:flex;flex-direction:column;height:212px}
-.tabrow{display:flex;border-bottom:4px solid var(--line);flex:none;align-items:stretch}
-.tabs{display:flex;gap:0;overflow-x:auto;flex:1;min-width:0;scrollbar-width:none}
+.dock{min-width:0;background:var(--panel);border-top:4px solid var(--line);display:flex;flex-direction:column;height:268px}
+.tabrow{display:flex;flex:none;align-items:stretch}
+.tabs{display:flex;flex-wrap:wrap;gap:0;flex:1;min-width:0}
 .find{display:flex;align-items:center;gap:8px;padding:0 12px;border-left:4px solid var(--line);color:var(--dim);flex:none}
 .find input{width:200px;background:var(--bg);border:2px solid var(--line);color:var(--ink);font:inherit;padding:4px 8px 2px;outline:0;text-transform:uppercase}
 .find input:focus{border-color:var(--butter)}
 .find input::placeholder{color:#5f5174}
 .tabs::-webkit-scrollbar{display:none}
-.tab{display:flex;gap:8px;align-items:baseline;padding:10px 16px 6px;border-right:4px solid var(--line);color:var(--dim);position:relative;white-space:nowrap}
+.tab{display:flex;gap:8px;align-items:baseline;padding:8px 14px 4px;border-right:4px solid var(--line);border-bottom:4px solid var(--line);color:var(--dim);position:relative;white-space:nowrap}
+.tab.crazyt{color:#15111c;background:var(--pink);animation:crazytab 1.2s steps(1) infinite}
+@keyframes crazytab{0%{background:var(--pink)}33%{background:var(--butter)}66%{background:var(--mint)}100%{background:var(--pink)}}
+.tab.crazyt.on{animation:none;background:var(--ink)}
 .tab i{font-style:normal;font-size:16px;opacity:.7}
 .tab:hover{color:var(--ink);background:var(--panel2)}
 .tab.on{color:#15111c;background:var(--c)}
@@ -187,7 +190,7 @@ body.chaos .frame{animation:chaosframe .6s steps(1) infinite}
 .tile.peek em{color:var(--butter)}
 
 /* ---- toast ---- */
-.toasts{position:fixed;left:50%;bottom:236px;transform:translateX(-50%);z-index:70;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+.toasts{position:fixed;left:50%;bottom:292px;transform:translateX(-50%);z-index:70;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
 .toast{display:flex;gap:12px;align-items:center;padding:12px 16px 8px;background:var(--ink);color:#15111c;border:4px solid var(--c);box-shadow:8px 8px 0 var(--shadow);pointer-events:auto;cursor:pointer;
   animation:pop .5s steps(6) both}
 .toast.out{animation:out .5s steps(5) forwards}
@@ -328,9 +331,9 @@ const EMPTY=0,STATIC=1,POWDER=2,LIQUID=3,GAS=4,FIREB=5,SPARKB=6;
 const AIR=0.00122;
 const ELS=[],ID={};
 const CATS=[
-  ['lab','LAB','#ffd45e'],['powder','POWDERS','#f2b968'],['liquid','LIQUIDS','#5cc8ff'],['gas','GASES','#8be8c4'],
+  ['lab','LAB','#ffd45e'],['crazy','CRAZY','#ff4fd8'],['powder','POWDERS','#f2b968'],['liquid','LIQUIDS','#5cc8ff'],['gas','GASES','#8be8c4'],
   ['metal','METALS','#c9d3e0'],['alloy','ALLOYS','#e8b86a'],['mineral','MINERALS','#c2a8c8'],['life','LIFE','#6ee7a0'],['flora','FLORA','#7be07a'],
-  ['boom','BOOM','#ff6a5c'],['crazy','CRAZY','#ff4fd8'],['serum','SERUMS','#7be0ff'],['demo','DEMOS','#b896ff']
+  ['serum','SERUMS','#7be0ff'],['demo','DEMOS','#b896ff']
 ];
 const BEHN=['EMPTY','SOLID','POWDER','LIQUID','GAS','ENERGY','ENERGY'];
 const D_COND=[.012,.3,.15,.5,.03,.8,.8],D_CAP=[1,2,1.6,3,1,1,1];
@@ -596,6 +599,7 @@ def('compoundx','Compound X','Compound X','X','boom',POWDER,2.2,[255,70,170],{ba
   burn:{T:80,p:.9,to:'void',heat:900,flame:1,boom:[1,8],eq:'COMPOUND X goes off'},tag:['HAIR TRIGGER'],desc:'The movie one. Blows up when it lands, when you breathe on it, when you look at it wrong.'});
 for(let n=1;n<=8;n++)def('serum'+n,'Serum','Serum','SERUM','serum',LIQUID,1.02,[120,230,255],{alpha:.88,cond:.5,cap:3,sp:'serum',nocodex:1,desc:''});
 
+for(const k of ['dynamite','tnt','nitro','gunpowder','thermite','ammoniumnitrate','napalm','phosphorus','carbide','ni3','fulminate','compoundx'])ELS[ID[k]].cat='crazy';
 const NE=ELS.length;
 const FIRE=ID.fire,SPARK=ID.spark,MOLTEN=ID.molten,OXY=ID.oxygen,GLASS=ID.glass,BENCH=ID.bench,ICE=ID.ice,PLANT=ID.plant;
 const resolveKey=k=>k==='void'?0:ID[k];
@@ -1327,7 +1331,7 @@ function serumFx(i,x,y,e){
 }
 
 /* ---------------- crazy specials ---------------- */
-const RANDPOOL=ELS.filter(e=>e.id>0&&!e.hide&&e.fixedT===undefined&&!e.sp&&!e.tintFire&&['powder','liquid','gas','metal','alloy','mineral','boom'].includes(e.cat)&&e.id!==BENCH).map(e=>e.id);
+const RANDPOOL=ELS.filter(e=>e.id>0&&!e.hide&&e.fixedT===undefined&&!e.sp&&!e.tintFire&&['powder','liquid','gas','metal','alloy','mineral','boom','crazy'].includes(e.cat)&&e.id!==BENCH).map(e=>e.id);
 const FWTINTS=['lithium','sodium','potassium','strontium','barium','coppersulfate','cesium','calcium','rubidium'].map(k=>ID[k]);
 function burst(x,y,tint){
   const t2=FWTINTS[(rnd()*FWTINTS.length)|0];
@@ -1772,14 +1776,14 @@ const TOOLS=[
   {kind:'cool',nm:'Chiller',name:'Chiller',sym:'-HEAT',col:[92,200,255],desc:'Pulls heat out. Freezes water and solidifies melts.',tag:['-90 C / TICK']},
   {kind:'erase',nm:'Eraser',name:'Eraser',sym:'ERASE',col:[246,239,224],desc:'Removes anything under the brush, glass and benches too.'},
   {kind:'vial',nm:'Vial',name:'Vial capture',sym:'[  ]',col:[255,212,94],desc:'Drag a box round some chemicals to bottle them. Then click the vial in the rack and hold on the bench to pour it out.'},
-  {kind:'tap',nm:'Tap',name:'Tap',sym:'TAP',col:[255,214,80],desc:'Click to tap the bench. Gentle. Hair-trigger explosives will not appreciate it.'},
-  {kind:'meteor',nm:'Meteor',name:'Meteor strike',sym:'ROCK',col:[255,150,60],desc:'Click to drop a meteor. Craters the bench and leaves molten rock.'},
-  {kind:'bolt',nm:'Lightning',name:'Lightning',sym:'ZZAP',col:[160,255,255],desc:'Click to drop a lightning bolt from the sky. Lights fuel, shatters glass, runs down metal.'},
+  {kind:'tap',cat:'crazy',nm:'Tap',name:'Tap',sym:'TAP',col:[255,214,80],desc:'Click to tap the bench. Gentle. Hair-trigger explosives will not appreciate it.'},
+  {kind:'meteor',cat:'crazy',nm:'Meteor',name:'Meteor strike',sym:'ROCK',col:[255,150,60],desc:'Click to drop a meteor. Craters the bench and leaves molten rock.'},
+  {kind:'bolt',cat:'crazy',nm:'Lightning',name:'Lightning',sym:'ZZAP',col:[160,255,255],desc:'Click to drop a lightning bolt from the sky. Lights fuel, shatters glass, runs down metal.'},
   {kind:'stamp',stamp:'beaker',nm:'Beaker',name:'Beaker',sym:'U',col:[150,205,215],desc:'Click to place a glass beaker.'},
   {kind:'stamp',stamp:'tube',nm:'Test tube',name:'Test tube',sym:'I',col:[150,205,215],desc:'Click to place a test tube.'},
   {kind:'stamp',stamp:'flask',nm:'Flask',name:'Flask',sym:'V',col:[150,205,215],desc:'Click to place a flask.'},
 ];
-for(const t of TOOLS)items.push({cat:'lab',kind:'tool',tool:t,nm:t.nm,name:t.name,sym:t.sym,col:t.col,desc:t.desc,tag:t.tag||[],state:'TOOL'});
+for(const t of TOOLS)items.push({cat:t.cat||'lab',kind:'tool',tool:t,nm:t.nm,name:t.name,sym:t.sym,col:t.col,desc:t.desc,tag:t.tag||[],state:'TOOL'});
 for(const e of ELS){
   if(e.hide||e.cat==='-'||e.id===0)continue;
   items.push({cat:e.cat,kind:'el',el:e,tool:e.tintFire?{kind:'el',id:FIRE,aux:e.id}:{kind:'el',id:e.id},nm:e.nm||e.name,name:e.name,sym:e.sym,col:e.col,desc:e.desc,tag:e.tag||[],state:BEHN[e.beh]});
@@ -1873,7 +1877,7 @@ function startBench(){
 }
 
 /* ---------- dock ---------- */
-let cat='powder',tool=null,curItem=null,lastTool=null;
+let cat='crazy',tool=null,curItem=null,lastTool=null;
 const dockTabs=$('#tabs'),dockGrid=$('#grid');
 const visible=it=>it.kind!=='el'||it.sp||sandbox||KNOWN[it.el.id];
 function counts(){
@@ -1884,7 +1888,7 @@ function counts(){
 function buildTabs(){
   dockTabs.innerHTML=CATS.map(([k,n,c])=>{const total=items.filter(i=>i.cat===k&&visible(i)).length;
     if(!total&&k!==cat)return '';
-    return `<button class="tab ${k===cat?'on':''}" data-k="${k}" style="--c:${c}"><span>${n}</span><i>${total}</i></button>`}).join('');
+    return `<button class="tab ${k===cat?'on':''} ${k==='crazy'?'crazyt':''}" data-k="${k}" style="--c:${c}"><span>${n}</span><i>${total}</i></button>`}).join('');
 }
 const findEl=$('#find');
 function buildGrid(){
@@ -2251,7 +2255,7 @@ function loop(ts){
   $('#cxunlock').setAttribute('aria-pressed',sandbox);
   buildTabs();
   select(items.find(i=>i.el&&i.el.key==='water'));
-  cat='liquid';buildTabs();buildGrid();
+  cat='crazy';buildTabs();buildGrid();
   {const mc=/cat=(\w+)/.exec(location.hash);if(mc){cat=mc[1];buildTabs();buildGrid()}}
   loadSerums();
   counts();renderRack();fit();startBench();

@@ -52,14 +52,14 @@ const TOOLS=[
   {kind:'cool',nm:'Chiller',name:'Chiller',sym:'-HEAT',col:[92,200,255],desc:'Pulls heat out. Freezes water and solidifies melts.',tag:['-90 C / TICK']},
   {kind:'erase',nm:'Eraser',name:'Eraser',sym:'ERASE',col:[246,239,224],desc:'Removes anything under the brush, glass and benches too.'},
   {kind:'vial',nm:'Vial',name:'Vial capture',sym:'[  ]',col:[255,212,94],desc:'Drag a box round some chemicals to bottle them. Then click the vial in the rack and hold on the bench to pour it out.'},
-  {kind:'tap',nm:'Tap',name:'Tap',sym:'TAP',col:[255,214,80],desc:'Click to tap the bench. Gentle. Hair-trigger explosives will not appreciate it.'},
-  {kind:'meteor',nm:'Meteor',name:'Meteor strike',sym:'ROCK',col:[255,150,60],desc:'Click to drop a meteor. Craters the bench and leaves molten rock.'},
-  {kind:'bolt',nm:'Lightning',name:'Lightning',sym:'ZZAP',col:[160,255,255],desc:'Click to drop a lightning bolt from the sky. Lights fuel, shatters glass, runs down metal.'},
+  {kind:'tap',cat:'crazy',nm:'Tap',name:'Tap',sym:'TAP',col:[255,214,80],desc:'Click to tap the bench. Gentle. Hair-trigger explosives will not appreciate it.'},
+  {kind:'meteor',cat:'crazy',nm:'Meteor',name:'Meteor strike',sym:'ROCK',col:[255,150,60],desc:'Click to drop a meteor. Craters the bench and leaves molten rock.'},
+  {kind:'bolt',cat:'crazy',nm:'Lightning',name:'Lightning',sym:'ZZAP',col:[160,255,255],desc:'Click to drop a lightning bolt from the sky. Lights fuel, shatters glass, runs down metal.'},
   {kind:'stamp',stamp:'beaker',nm:'Beaker',name:'Beaker',sym:'U',col:[150,205,215],desc:'Click to place a glass beaker.'},
   {kind:'stamp',stamp:'tube',nm:'Test tube',name:'Test tube',sym:'I',col:[150,205,215],desc:'Click to place a test tube.'},
   {kind:'stamp',stamp:'flask',nm:'Flask',name:'Flask',sym:'V',col:[150,205,215],desc:'Click to place a flask.'},
 ];
-for(const t of TOOLS)items.push({cat:'lab',kind:'tool',tool:t,nm:t.nm,name:t.name,sym:t.sym,col:t.col,desc:t.desc,tag:t.tag||[],state:'TOOL'});
+for(const t of TOOLS)items.push({cat:t.cat||'lab',kind:'tool',tool:t,nm:t.nm,name:t.name,sym:t.sym,col:t.col,desc:t.desc,tag:t.tag||[],state:'TOOL'});
 for(const e of ELS){
   if(e.hide||e.cat==='-'||e.id===0)continue;
   items.push({cat:e.cat,kind:'el',el:e,tool:e.tintFire?{kind:'el',id:FIRE,aux:e.id}:{kind:'el',id:e.id},nm:e.nm||e.name,name:e.name,sym:e.sym,col:e.col,desc:e.desc,tag:e.tag||[],state:BEHN[e.beh]});
@@ -153,7 +153,7 @@ function startBench(){
 }
 
 /* ---------- dock ---------- */
-let cat='powder',tool=null,curItem=null,lastTool=null;
+let cat='crazy',tool=null,curItem=null,lastTool=null;
 const dockTabs=$('#tabs'),dockGrid=$('#grid');
 const visible=it=>it.kind!=='el'||it.sp||sandbox||KNOWN[it.el.id];
 function counts(){
@@ -164,7 +164,7 @@ function counts(){
 function buildTabs(){
   dockTabs.innerHTML=CATS.map(([k,n,c])=>{const total=items.filter(i=>i.cat===k&&visible(i)).length;
     if(!total&&k!==cat)return '';
-    return `<button class="tab ${k===cat?'on':''}" data-k="${k}" style="--c:${c}"><span>${n}</span><i>${total}</i></button>`}).join('');
+    return `<button class="tab ${k===cat?'on':''} ${k==='crazy'?'crazyt':''}" data-k="${k}" style="--c:${c}"><span>${n}</span><i>${total}</i></button>`}).join('');
 }
 const findEl=$('#find');
 function buildGrid(){
@@ -531,7 +531,7 @@ function loop(ts){
   $('#cxunlock').setAttribute('aria-pressed',sandbox);
   buildTabs();
   select(items.find(i=>i.el&&i.el.key==='water'));
-  cat='liquid';buildTabs();buildGrid();
+  cat='crazy';buildTabs();buildGrid();
   {const mc=/cat=(\w+)/.exec(location.hash);if(mc){cat=mc[1];buildTabs();buildGrid()}}
   loadSerums();
   counts();renderRack();fit();startBench();

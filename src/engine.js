@@ -260,7 +260,7 @@ function serumFx(i,x,y,e){
 }
 
 /* ---------------- crazy specials ---------------- */
-const RANDPOOL=ELS.filter(e=>e.id>0&&!e.hide&&e.fixedT===undefined&&!e.sp&&!e.tintFire&&['powder','liquid','gas','metal','alloy','mineral','boom'].includes(e.cat)&&e.id!==BENCH).map(e=>e.id);
+const RANDPOOL=ELS.filter(e=>e.id>0&&!e.hide&&e.fixedT===undefined&&!e.sp&&!e.tintFire&&['powder','liquid','gas','metal','alloy','mineral','boom','crazy'].includes(e.cat)&&e.id!==BENCH).map(e=>e.id);
 const FWTINTS=['lithium','sodium','potassium','strontium','barium','coppersulfate','cesium','calcium','rubidium'].map(k=>ID[k]);
 function burst(x,y,tint){
   const t2=FWTINTS[(rnd()*FWTINTS.length)|0];

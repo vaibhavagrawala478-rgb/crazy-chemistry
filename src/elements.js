@@ -7,9 +7,9 @@ const EMPTY=0,STATIC=1,POWDER=2,LIQUID=3,GAS=4,FIREB=5,SPARKB=6;
 const AIR=0.00122;
 const ELS=[],ID={};
 const CATS=[
-  ['lab','LAB','#ffd45e'],['powder','POWDERS','#f2b968'],['liquid','LIQUIDS','#5cc8ff'],['gas','GASES','#8be8c4'],
+  ['lab','LAB','#ffd45e'],['crazy','CRAZY','#ff4fd8'],['powder','POWDERS','#f2b968'],['liquid','LIQUIDS','#5cc8ff'],['gas','GASES','#8be8c4'],
   ['metal','METALS','#c9d3e0'],['alloy','ALLOYS','#e8b86a'],['mineral','MINERALS','#c2a8c8'],['life','LIFE','#6ee7a0'],['flora','FLORA','#7be07a'],
-  ['boom','BOOM','#ff6a5c'],['crazy','CRAZY','#ff4fd8'],['serum','SERUMS','#7be0ff'],['demo','DEMOS','#b896ff']
+  ['serum','SERUMS','#7be0ff'],['demo','DEMOS','#b896ff']
 ];
 const BEHN=['EMPTY','SOLID','POWDER','LIQUID','GAS','ENERGY','ENERGY'];
 const D_COND=[.012,.3,.15,.5,.03,.8,.8],D_CAP=[1,2,1.6,3,1,1,1];
@@ -275,6 +275,7 @@ def('compoundx','Compound X','Compound X','X','boom',POWDER,2.2,[255,70,170],{ba
   burn:{T:80,p:.9,to:'void',heat:900,flame:1,boom:[1,8],eq:'COMPOUND X goes off'},tag:['HAIR TRIGGER'],desc:'The movie one. Blows up when it lands, when you breathe on it, when you look at it wrong.'});
 for(let n=1;n<=8;n++)def('serum'+n,'Serum','Serum','SERUM','serum',LIQUID,1.02,[120,230,255],{alpha:.88,cond:.5,cap:3,sp:'serum',nocodex:1,desc:''});
 
+for(const k of ['dynamite','tnt','nitro','gunpowder','thermite','ammoniumnitrate','napalm','phosphorus','carbide','ni3','fulminate','compoundx'])ELS[ID[k]].cat='crazy';
 const NE=ELS.length;
 const FIRE=ID.fire,SPARK=ID.spark,MOLTEN=ID.molten,OXY=ID.oxygen,GLASS=ID.glass,BENCH=ID.bench,ICE=ID.ice,PLANT=ID.plant;
 const resolveKey=k=>k==='void'?0:ID[k];
